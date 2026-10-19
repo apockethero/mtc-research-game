@@ -119,9 +119,9 @@ export const CardInspectorModal: React.FC = () => {
               <p>{card.limitation}</p>
             </div>
 
-            <div className="data-block" style={{ background: '#24131d' }}>
+            <div className="data-block citation-block">
               <h4>📚 Cita Bibliográfica Formateada</h4>
-              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '12px', color: '#f3d9d0', lineHeight: 1.5 }}>
+              <p style={{ fontFamily: 'var(--font-serif)', fontSize: '12px', lineHeight: 1.5 }}>
                 {card.citation || `${card.authors} (${card.year}). ${card.title}. ${card.venue || 'MTC Journal'}.`}
               </p>
               <button

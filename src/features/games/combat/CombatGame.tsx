@@ -318,9 +318,9 @@ export const CombatGame: React.FC = () => {
               combats.map((h, idx) => (
                 <div key={idx} className={`history-item-card ${h.verdict}`}>
                   <div className="h-badge">{h.verdictLabel}</div>
-                  <div className="h-title" style={{ color: '#fff', fontSize: '13px' }}>
+                  <div className="h-title" style={{ fontSize: '13px' }}>
                     <b>{h.cardB.id}</b> vs <b>{h.cardA.id}</b>{' '}
-                    <span style={{ fontSize: '10px', color: 'var(--c-rose)' }}>({h.timestamp})</span>
+                    <span className="h-timestamp" style={{ fontSize: '10px' }}>({h.timestamp})</span>
                   </div>
                   <p className="h-reason">{h.analysis}</p>
                 </div>

@@ -331,13 +331,13 @@ export const TimelineGame: React.FC = () => {
                       {/* MINI REVERSO */}
                       <div className="mini-card-back">
                         <span className="mini-card-badge">{c.id} · Metodología</span>
-                        <div style={{ fontSize: '11px', color: '#fff', margin: '4px 0', fontWeight: 700 }}>
+                        <div className="mini-card-method">
                           {c.methodClass}
                         </div>
-                        <p style={{ fontSize: '10px', color: '#f3d9d0', flex: 1, overflowY: 'auto' }}>
+                        <p className="mini-card-contrib">
                           <b>Aporte:</b> {c.contribution.slice(0, 90)}...
                         </p>
-                        <div style={{ fontSize: '9px', color: '#ff999f', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '4px' }}>
+                        <div className="mini-card-limit">
                           <b>Límite:</b> {c.limitation.slice(0, 70)}...
                         </div>
                         <div

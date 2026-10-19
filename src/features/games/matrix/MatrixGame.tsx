@@ -209,11 +209,11 @@ export const MatrixGame: React.FC = () => {
           </div>
 
           <div className="game-actions">
-            <div className="hud-stats-pill" style={{ background: '#20121a' }}>
+            <div className="hud-stats-pill">
               <span>Criterio:</span>
               <select
                 className="cyber-select"
-                style={{ padding: '3px 8px', fontSize: '12px', border: 0 }}
+                style={{ padding: '3px 8px', fontSize: '12px', border: 0, background: 'transparent' }}
                 value={criteria}
                 onChange={(e) => setCriteria(e.target.value as ClassificationCriteria)}
               >

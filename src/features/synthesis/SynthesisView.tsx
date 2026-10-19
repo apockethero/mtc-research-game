@@ -64,13 +64,13 @@ export const SynthesisView: React.FC = () => {
         {/* BARRA DE HERRAMIENTAS Y EXPORTACIÓN */}
         <div className="synthesis-toolbar">
           <div>
-            <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--c-peach)', letterSpacing: '0.5px' }}>
+            <span className="synthesis-tag">
               OUTPUT ACADÉMICO EN TIEMPO REAL
             </span>
-            <h3 style={{ color: '#fff', fontSize: '18px', margin: '2px 0' }}>
+            <h3 className="synthesis-title">
               Borrador Estructurado del Estado del Arte
             </h3>
-            <span style={{ fontSize: '12px', color: 'var(--c-rose)' }}>
+            <span className="synthesis-subtitle">
               Sintetizado a partir de <b>{report.stats.totalUniqueCards}</b> antecedentes trabajados en los minijuegos
             </span>
           </div>

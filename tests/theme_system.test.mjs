@@ -131,3 +131,48 @@ test('5. Prevención de parpadeo (Anti-flash) y persistencia inmediata en index.
     'index.html debe asignar data-theme de manera sincrónica'
   );
 });
+
+test('6. Contraste y legibilidad en modo claro (WCAG AA)', () => {
+  const cssPath = path.join(projectRoot, 'src/styles/styles.css');
+  const css = fs.readFileSync(cssPath, 'utf-8');
+
+  // Variables específicas de botones secundarios y de contorno
+  assert.ok(css.includes('--button-secondary-bg'), 'Debe definir --button-secondary-bg');
+  assert.ok(css.includes('--button-secondary-text'), 'Debe definir --button-secondary-text');
+  assert.ok(css.includes('--button-secondary-border'), 'Debe definir --button-secondary-border');
+  assert.ok(css.includes('--button-outline-bg'), 'Debe definir --button-outline-bg');
+  assert.ok(css.includes('--button-outline-text'), 'Debe definir --button-outline-text');
+  assert.ok(css.includes('--button-outline-border'), 'Debe definir --button-outline-border');
+
+  // Reglas de botones secundarios y de contorno en modo claro con fondo claro y texto oscuro
+  assert.ok(
+    css.includes('[data-theme="light"] .cyber-btn') ||
+    css.includes('[data-theme="light"] .cyber-btn-outline') ||
+    css.includes('--button-outline-text: #2b1420;'),
+    'Modo claro debe definir botones con texto oscuro de alto contraste'
+  );
+
+  // Verificación de contenedor de paneles de vidrio y modales en modo claro
+  assert.ok(
+    css.includes('[data-theme="light"] .glass-panel'),
+    'Modo claro debe contar con regla para .glass-panel con fondo claro'
+  );
+
+  // Verificación de tarjeta de encabezado y píldora de sesión en Evaluación Científica
+  assert.ok(
+    css.includes('[data-theme="light"] .eval-header-card'),
+    'Modo claro debe definir .eval-header-card con fondo claro'
+  );
+  assert.ok(
+    css.includes('[data-theme="light"] .eval-session-pill'),
+    'Modo claro debe definir .eval-session-pill con contraste legible'
+  );
+
+  // Verificación de texto oscuro sobre melocotón al pasar el cursor sobre botón primario
+  assert.ok(
+    (css.includes('var(--c-peach)') || css.includes('#FD995C')) && css.includes('color: #1a0810;'),
+    'Botón primario al hacer hover con fondo melocotón/cobre debe usar texto oscuro (#1a0810)'
+  );
+});
+
+

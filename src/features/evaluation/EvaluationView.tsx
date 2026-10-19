@@ -120,7 +120,7 @@ export const EvaluationView: React.FC = () => {
         <div className="eval-header-card">
           <div className="eval-header-meta-bar">
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--c-peach)', letterSpacing: '0.5px' }}>
+              <span className="eval-version-badge">
                 INSTRUMENTO DE VALIDACIÓN CIENTÍFICA · VERSIÓN 1.1.0
               </span>
               <span
@@ -138,7 +138,7 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div className="hud-stats-pill" style={{ background: '#20101b', border: '1px solid var(--border-color)', margin: 0 }}>
+              <div className="hud-stats-pill eval-session-pill">
                 <span>ID Sesión:</span> <b>{session.sessionId}</b>
               </div>
               {session.currentStage !== 'stage_complete' && (
@@ -251,8 +251,8 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* Condiciones del Consentimiento */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', border: '1px solid #3d1b2a', marginBottom: '18px', fontSize: '12.5px', color: '#fcebe6' }}>
-              <h4 style={{ color: 'var(--c-rose)', margin: '0 0 8px 0', fontSize: '13px' }}>Términos y Salvaguardas Éticas:</h4>
+            <div className="eval-info-box" style={{ padding: '16px', borderRadius: '8px', marginBottom: '18px', fontSize: '12.5px' }}>
+              <h4 style={{ color: 'var(--c-copper)', margin: '0 0 8px 0', fontSize: '13px', fontWeight: 800 }}>Términos y Salvaguardas Éticas:</h4>
               <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
                 <li><b>Finalidad:</b> Estudio exploratorio para evaluar si las tarjetas ayudan a entender el estado del arte.</li>
                 <li><b>Participación Libre:</b> Es voluntaria y puedes retirarte en cualquier momento sin penalización.</li>
@@ -262,14 +262,14 @@ export const EvaluationView: React.FC = () => {
               </ul>
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer', background: '#22111d', padding: '14px', borderRadius: '8px', border: session.consentGiven ? '1px solid var(--c-peach)' : '1px solid #4a2133' }}>
+            <label className="eval-consent-checkbox-label">
               <input
                 type="checkbox"
                 checked={session.consentGiven}
                 onChange={(e) => updateConsent(e.target.checked)}
                 style={{ marginTop: '3px', transform: 'scale(1.2)' }}
               />
-              <span style={{ fontSize: '13px', color: '#fff' }}>
+              <span className="eval-consent-text">
                 <b>He leído la información y acepto participar</b> en esta evaluación en <b>{isGuided ? 'Modo Guiado' : 'Modo de Investigación'}</b>.
               </span>
             </label>
@@ -291,8 +291,8 @@ export const EvaluationView: React.FC = () => {
             ========================================================================= */}
         {session.currentStage === 'stage_a_profile' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa A. Cuéntanos sobre ti (Perfil)</h3>
-            <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
+            <h3 className="eval-stage-title">Etapa A. Cuéntanos sobre ti (Perfil)</h3>
+            <p className="eval-stage-desc">
               {isGuided
                 ? 'Indica tu nivel de estudios o rol general para entender cómo se adaptan las tarjetas a diferentes personas. No pedimos datos personales.'
                 : 'Por favor, indica tu contexto formativo y nivel de experiencia técnica para contextualizar la evaluación.'}
@@ -426,14 +426,14 @@ export const EvaluationView: React.FC = () => {
         {session.currentStage === 'stage_b_k1' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+              <h3 className="eval-stage-title" style={{ margin: 0 }}>
                 Etapa B. K1: Comprender las ideas
               </h3>
-              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+              <span className="eval-stage-tag">
                 Criterio Metodológico K1
               </span>
             </div>
-            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+            <p className="eval-stage-lead">
               {isGuided
                 ? 'Objetivo: Vamos a ver si puedes entender qué propone cada estudio observando sus esquemas técnicos, qué pruebas hicieron y qué límites tienen.'
                 : 'Objetivo: Evaluar la comprensión conceptual, la distinción de evidencia y el reconocimiento de aportes y limitaciones metodológicas.'}
@@ -485,8 +485,8 @@ export const EvaluationView: React.FC = () => {
 
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
                 {K1_QUESTIONS.q2EvidenceTypes.items.map((item) => (
-                  <div key={item.cardId} style={{ background: '#22111d', padding: '14px', borderRadius: '8px', border: '1px solid #3d1c2c' }}>
-                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--c-peach)', marginBottom: '8px' }}>
+                  <div key={item.cardId} className="eval-card-item-box">
+                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--c-copper)', marginBottom: '8px' }}>
                       {item.authorYear}
                     </div>
 
@@ -629,14 +629,14 @@ export const EvaluationView: React.FC = () => {
         {session.currentStage === 'stage_c_k2' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+              <h3 className="eval-stage-title" style={{ margin: 0 }}>
                 Etapa C. K2: Comprobar la información
               </h3>
-              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+              <span className="eval-stage-tag">
                 Criterio Metodológico K2
               </span>
             </div>
-            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+            <p className="eval-stage-lead">
               {isGuided
                 ? 'Objetivo: Vamos a comprobar si puedes ubicar de dónde sale un estudio científico y qué hacer cuando un dato de calidad todavía no está confirmado.'
                 : 'Objetivo: Evaluar la localización e interpretación de metadatos de fuentes primarias, persistencia DOI y tratamiento de indicadores pendientes o ausentes.'}
@@ -821,14 +821,14 @@ export const EvaluationView: React.FC = () => {
         {session.currentStage === 'stage_d_k3' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+              <h3 className="eval-stage-title" style={{ margin: 0 }}>
                 Etapa D. K3: Comparar dos estudios
               </h3>
-              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+              <span className="eval-stage-tag">
                 Criterio Metodológico K3
               </span>
             </div>
-            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+            <p className="eval-stage-lead">
               {isGuided
                 ? 'Objetivo: Vamos a poner dos investigaciones frente a frente. Elige dos tarjetas para compararlas lado a lado y describe qué hace cada una.'
                 : 'Objetivo: Contrastar dos antecedentes del corpus, evaluar diferencias de método, contexto o limitaciones y registrar el nivel de confianza analítica.'}
@@ -837,8 +837,8 @@ export const EvaluationView: React.FC = () => {
             {/* Comparador Lado a Lado (Side-by-Side) */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '18px' }}>
               {/* Tarjeta 1 */}
-              <div style={{ background: '#190d16', padding: '14px', borderRadius: '8px', border: '1px solid #3d1b2b' }}>
-                <label style={{ fontSize: '12px', color: 'var(--c-peach)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+              <div className="eval-info-box" style={{ padding: '14px', borderRadius: '8px' }}>
+                <label style={{ fontSize: '12px', color: 'var(--c-copper)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
                   Investigación A (Base):
                 </label>
                 <select
@@ -866,8 +866,8 @@ export const EvaluationView: React.FC = () => {
               </div>
 
               {/* Tarjeta 2 */}
-              <div style={{ background: '#190d16', padding: '14px', borderRadius: '8px', border: '1px solid #3d1b2b' }}>
-                <label style={{ fontSize: '12px', color: 'var(--c-peach)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+              <div className="eval-info-box" style={{ padding: '14px', borderRadius: '8px' }}>
+                <label style={{ fontSize: '12px', color: 'var(--c-copper)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
                   Investigación B (Contraste):
                 </label>
                 <select
@@ -982,14 +982,14 @@ export const EvaluationView: React.FC = () => {
         {session.currentStage === 'stage_e_k4' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+              <h3 className="eval-stage-title" style={{ margin: 0 }}>
                 Etapa E. K4: Conectar las ideas
               </h3>
-              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+              <span className="eval-stage-tag">
                 Criterio Metodológico K4
               </span>
             </div>
-            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+            <p className="eval-stage-lead">
               {isGuided
                 ? 'Objetivo: Une tres investigaciones para contar una historia completa y explica la idea principal con tus propias palabras a alguien que no conoce el tema.'
                 : 'Objetivo: Evaluar la capacidad de sintetizar aportes cruzados entre al menos tres antecedentes y realizar una transferencia divulgativa rigurosa.'}
@@ -1109,8 +1109,8 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* Rúbrica de evaluación de 7 criterios */}
-            <div className="eval-question-card" style={{ background: '#170c14', border: '1px solid #4a2233', marginBottom: '24px' }}>
-              <h4 style={{ color: 'var(--c-peach)', margin: '0 0 6px 0', fontSize: '13.5px', fontWeight: 800 }}>
+            <div className="eval-question-card eval-codebook-card">
+              <h4 style={{ color: 'var(--c-copper)', margin: '0 0 6px 0', fontSize: '13.5px', fontWeight: 800 }}>
                 📋 Rúbrica de 7 Criterios para Revisión por Pares
               </h4>
               <p style={{ fontSize: '12px', color: 'var(--c-rose)', margin: '0 0 14px 0', lineHeight: 1.5 }}>
@@ -1118,9 +1118,9 @@ export const EvaluationView: React.FC = () => {
               </p>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', fontSize: '11.5px' }}>
                 {K4_EVALUATION_RUBRIC.map(crit => (
-                  <div key={crit.criterionId} style={{ background: '#22111d', padding: '10px 12px', borderRadius: '6px', border: '1px solid #381827' }}>
-                    <b style={{ color: '#fff', display: 'block', marginBottom: '4px' }}>{crit.name}</b>
-                    <p style={{ margin: 0, color: '#fcebe6', opacity: 0.9, lineHeight: 1.4 }}>{crit.description}</p>
+                  <div key={crit.criterionId} className="eval-codebook-item">
+                    <b className="eval-codebook-title">{crit.name}</b>
+                    <p className="eval-codebook-desc">{crit.description}</p>
                   </div>
                 ))}
               </div>
@@ -1152,14 +1152,14 @@ export const EvaluationView: React.FC = () => {
         {session.currentStage === 'stage_f_k5_k6' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+              <h3 className="eval-stage-title" style={{ margin: 0 }}>
                 Etapa F. K5: Facilidad de uso y K6: Esfuerzo y dificultad
               </h3>
-              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+              <span className="eval-stage-tag">
                 Criterios K5 y K6
               </span>
             </div>
-            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+            <p className="eval-stage-lead">
               {isGuided
                 ? 'Objetivo: Cuéntanos qué tan fácil te pareció la herramienta y cuánto esfuerzo mental sentiste al usarla. Elige del 1 al 5 o marca "No sé".'
                 : 'Objetivo: Evaluar dimensiones de usabilidad percibida (K5) y demanda cognitiva (K6) de manera diferenciada en escala Likert.'}
@@ -1320,52 +1320,52 @@ export const EvaluationView: React.FC = () => {
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '20px' }}>
-              <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>Modalidad Seleccionada:</b>
-                <div style={{ fontSize: '13px', color: '#fff', marginTop: '4px' }}>
+              <div className="eval-stat-grid-item">
+                <b style={{ color: 'var(--c-copper)', fontSize: '12px' }}>Modalidad Seleccionada:</b>
+                <div className="eval-stat-grid-val">
                   {isGuided ? '🌟 Modo Guiado' : '🔬 Modo de Investigación'}
                 </div>
               </div>
 
-              <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>Pistas / Ayudas Consultadas:</b>
-                <div style={{ fontSize: '13px', color: session.hintsUsed?.length > 0 ? '#4ade80' : 'var(--c-rose)', marginTop: '4px' }}>
+              <div className="eval-stat-grid-item">
+                <b style={{ color: 'var(--c-copper)', fontSize: '12px' }}>Pistas / Ayudas Consultadas:</b>
+                <div style={{ fontSize: '13px', color: session.hintsUsed?.length > 0 ? '#15803d' : 'var(--text-secondary)', marginTop: '4px', fontWeight: 700 }}>
                   {session.hintsUsed?.length || 0} pistas utilizadas
                 </div>
               </div>
 
-              <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>B. K1: Comprender las ideas:</b>
-                <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
+              <div className="eval-stat-grid-item">
+                <b style={{ color: 'var(--c-copper)', fontSize: '12px' }}>B. K1: Comprender las ideas:</b>
+                <div className="eval-stat-grid-val">
                   4 de 4 tareas objetivas registradas
                 </div>
               </div>
 
-              <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>C. K2: Comprobar la información:</b>
-                <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
+              <div className="eval-stat-grid-item">
+                <b style={{ color: 'var(--c-copper)', fontSize: '12px' }}>C. K2: Comprobar la información:</b>
+                <div className="eval-stat-grid-val">
                   Metadatos y preguntas de verificación completadas
                 </div>
               </div>
 
-              <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>D. K3: Comparar dos estudios:</b>
-                <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
+              <div className="eval-stat-grid-item">
+                <b style={{ color: 'var(--c-copper)', fontSize: '12px' }}>D. K3: Comparar dos estudios:</b>
+                <div className="eval-stat-grid-val">
                   Contraste entre {(session.k3Responses.selectedCardIds || []).join(' y ')}
                 </div>
               </div>
 
-              <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>E. K4: Conectar las ideas:</b>
-                <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
+              <div className="eval-stat-grid-item">
+                <b style={{ color: 'var(--c-copper)', fontSize: '12px' }}>E. K4: Conectar las ideas:</b>
+                <div className="eval-stat-grid-val">
                   Síntesis de {(session.k4Responses.selectedCardIds || []).join(', ')}
                 </div>
               </div>
             </div>
 
-            <div style={{ background: '#20101b', padding: '14px', borderRadius: '8px', border: '1px solid var(--c-copper)', marginBottom: '22px' }}>
-              <b style={{ color: 'var(--c-peach)', fontSize: '13px' }}>⚡ Confirmación de Registro Local</b>
-              <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#fcebe6' }}>
+            <div className="eval-alert-banner">
+              <b style={{ color: 'var(--c-copper)', fontSize: '13px' }}>⚡ Confirmación de Registro Local</b>
+              <p>
                 Al pulsar el botón a continuación, se calcularán las puntuaciones objetivas reproducibles correspondientes a tu modalidad y se habilitarán las opciones de exportación a JSON y CSV.
               </p>
             </div>
@@ -1393,33 +1393,33 @@ export const EvaluationView: React.FC = () => {
         {session.currentStage === 'stage_complete' && (
           <div className="glass-panel" style={{ padding: '28px', textAlign: 'center' }}>
             <div style={{ fontSize: '44px', marginBottom: '8px' }}>🎉</div>
-            <h3 style={{ color: 'var(--c-peach)', margin: '0 0 8px 0' }}>¡Evaluación Completada con Éxito!</h3>
-            <p style={{ fontSize: '14px', color: '#fcebe6', maxWidth: '640px', margin: '0 auto 20px' }}>
+            <h3 className="eval-stage-title" style={{ margin: '0 0 8px 0' }}>¡Evaluación Completada con Éxito!</h3>
+            <p className="eval-stage-lead" style={{ maxWidth: '640px', margin: '0 auto 20px' }}>
               Muchas gracias por tu tiempo y dedicación. Tus respuestas han sido procesadas localmente en <b>{isGuided ? 'Modo Guiado' : 'Modo de Investigación'}</b> con el código anónimo <b>{session.sessionId}</b>.
             </p>
 
             {/* Resumen de puntuaciones objetivas */}
             {session.objectiveScores && (
-              <div style={{ background: '#190d16', padding: '18px', borderRadius: '8px', border: '1px solid #381827', maxWidth: '580px', margin: '0 auto 24px', textAlign: 'left' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid #331725', paddingBottom: '6px' }}>
-                  <h4 style={{ color: 'var(--c-peach)', margin: 0, fontSize: '14px' }}>
+              <div className="eval-results-card">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid rgba(108, 55, 69, 0.2)', paddingBottom: '6px' }}>
+                  <h4 style={{ color: 'var(--c-copper)', margin: 0, fontSize: '14px', fontWeight: 800 }}>
                     📊 Resumen de Respuestas Objetivas:
                   </h4>
-                  <span style={{ fontSize: '11px', background: '#291220', color: 'var(--c-rose)', padding: '2px 8px', borderRadius: '10px' }}>
+                  <span style={{ fontSize: '11px', background: 'rgba(184, 44, 57, 0.1)', color: 'var(--c-crimson)', padding: '2px 8px', borderRadius: '10px', fontWeight: 700 }}>
                     Modalidad: {session.objectiveScores.modeScored === 'guiado' ? '🌟 Guiado' : '🔬 Investigación'}
                   </span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#fff' }}>K1: Comprender las ideas:</span>
-                  <b style={{ color: 'var(--c-peach)' }}>{session.objectiveScores.k1Score} / {session.objectiveScores.k1Max} pts</b>
+                  <span className="eval-results-row-lbl">K1: Comprender las ideas:</span>
+                  <b style={{ color: 'var(--c-copper)' }}>{session.objectiveScores.k1Score} / {session.objectiveScores.k1Max} pts</b>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#fff' }}>K2: Comprobar la información:</span>
-                  <b style={{ color: 'var(--c-peach)' }}>{session.objectiveScores.k2Score} / {session.objectiveScores.k2Max} pts</b>
+                  <span className="eval-results-row-lbl">K2: Comprobar la información:</span>
+                  <b style={{ color: 'var(--c-copper)' }}>{session.objectiveScores.k2Score} / {session.objectiveScores.k2Max} pts</b>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', borderTop: '1px dashed #3d1b2a', paddingTop: '8px' }}>
-                  <span style={{ color: '#fff', fontWeight: 700 }}>Total Objetivo Replicable:</span>
-                  <b style={{ color: '#4ade80', fontSize: '15px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', borderTop: '1px dashed rgba(108, 55, 69, 0.25)', paddingTop: '8px' }}>
+                  <span className="eval-results-row-lbl" style={{ fontWeight: 700 }}>Total Objetivo Replicable:</span>
+                  <b style={{ color: '#15803d', fontSize: '15px' }}>
                     {session.objectiveScores.totalObjectiveScore} / {session.objectiveScores.totalObjectiveMax} pts ({session.objectiveScores.percentage}%)
                   </b>
                 </div>
@@ -1492,9 +1492,9 @@ export const EvaluationView: React.FC = () => {
             ========================================================================= */}
         {confirmDeleteModal && (
           <div className="modal-overlay" role="dialog" aria-modal="true">
-            <div className="glass-panel" style={{ maxWidth: '480px', padding: '24px', border: '1px solid var(--c-crimson)', background: '#1c0c16' }}>
-              <h3 style={{ color: '#ff707a', margin: '0 0 10px 0' }}>⚠️ ¿Eliminar datos locales de la evaluación?</h3>
-              <p style={{ fontSize: '13px', lineHeight: 1.5, color: '#fcebe6', margin: '0 0 18px 0' }}>
+            <div className="glass-panel eval-danger-modal">
+              <h3>⚠️ ¿Eliminar datos locales de la evaluación?</h3>
+              <p>
                 Esta acción eliminará de forma irreversible las respuestas guardadas localmente en este navegador para la sesión <b>{session.sessionId}</b>. Si deseas conservarlas, descárgalas en JSON o CSV antes de continuar.
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>

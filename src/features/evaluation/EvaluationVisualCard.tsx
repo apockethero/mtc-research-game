@@ -43,8 +43,6 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
     <div
       className="eval-visual-card-frame"
       style={{
-        background: '#1a0e17',
-        border: '1px solid #3d1c2c',
         borderRadius: '10px',
         padding: '12px',
         marginBottom: '16px',
@@ -68,7 +66,7 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
           >
             {cardId}
           </span>
-          <span style={{ fontSize: '13px', fontWeight: 700, color: '#fcebe6' }}>
+          <span className="eval-visual-card-title" style={{ fontSize: '13px' }}>
             {customTitle || `Ilustración Técnica: Investigación ${cardId}`}
           </span>
         </div>
@@ -81,8 +79,8 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
               style={{
                 fontSize: '11px',
                 padding: '3px 8px',
-                color: wasHintUsed ? '#4ade80' : 'var(--c-peach)',
-                borderColor: wasHintUsed ? 'rgba(74, 222, 128, 0.4)' : 'rgba(253, 153, 92, 0.4)'
+                color: wasHintUsed ? '#15803d' : 'var(--c-copper)',
+                borderColor: wasHintUsed ? 'rgba(21, 128, 61, 0.4)' : 'rgba(212, 120, 61, 0.4)'
               }}
               onClick={handleOpenHint}
               title="Consultar pista o explicación de términos"
@@ -105,17 +103,16 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
 
       {/* Contenedor de la ilustración técnica con enmascaramiento controlado */}
       <div
+        className="eval-visual-image-frame"
         style={{
           position: 'relative',
           width: '100%',
           maxHeight: '220px',
-          background: '#0f070d',
           borderRadius: '8px',
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
-          border: '1px solid #2a1320'
+          justifyContent: 'center'
         }}
       >
         <img
@@ -160,11 +157,10 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
       {/* Metadatos visibles SOLO cuando corresponde a trazabilidad (K2) */}
       {showMetadata && card && (
         <div
+          className="eval-visual-metadata-box"
           style={{
-            background: '#22111d',
             padding: '10px 12px',
             borderRadius: '6px',
-            border: '1px solid #3d1b2b',
             fontSize: '12px',
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -172,19 +168,19 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
           }}
         >
           <div>
-            <span style={{ color: 'var(--c-peach)', fontWeight: 700 }}>Autor y Año: </span>
-            <span style={{ color: '#fff' }}>{card.firstAuthor} ({card.year})</span>
+            <span className="eval-visual-metadata-lbl">Autor y Año: </span>
+            <span className="eval-visual-metadata-val">{card.firstAuthor} ({card.year})</span>
           </div>
           <div>
-            <span style={{ color: 'var(--c-peach)', fontWeight: 700 }}>DOI: </span>
-            <span style={{ color: '#fff', wordBreak: 'break-all' }}>{card.doi || '10.1016/j.est.2023.107892'}</span>
+            <span className="eval-visual-metadata-lbl">DOI: </span>
+            <span className="eval-visual-metadata-val" style={{ wordBreak: 'break-all' }}>{card.doi || '10.1016/j.est.2023.107892'}</span>
           </div>
           <div>
-            <span style={{ color: 'var(--c-peach)', fontWeight: 700 }}>Tipo Documental: </span>
-            <span style={{ color: '#fff' }}>Artículo en revista (Journal)</span>
+            <span className="eval-visual-metadata-lbl">Tipo Documental: </span>
+            <span className="eval-visual-metadata-val">Artículo en revista (Journal)</span>
           </div>
           <div>
-            <span style={{ color: 'var(--c-peach)', fontWeight: 700 }}>Indicador Scopus: </span>
+            <span className="eval-visual-metadata-lbl">Indicador Scopus: </span>
             <span style={{ color: '#15803d', fontWeight: 700 }}>{card.quality || 'Q1'} (Verificado)</span>
           </div>
         </div>
@@ -200,18 +196,16 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
           style={{ zIndex: 300, cursor: 'zoom-out' }}
         >
           <div
-            className="glass-panel"
+            className="glass-panel eval-zoom-modal-content"
             style={{
               maxWidth: '720px',
               width: '90%',
-              padding: '18px',
-              background: '#160b13',
-              border: '1px solid var(--c-peach)'
+              padding: '18px'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <b style={{ color: 'var(--c-peach)', fontSize: '14px' }}>
+              <b style={{ color: 'var(--c-copper)', fontSize: '14px', fontWeight: 800 }}>
                 Vista Ampliada: Investigación {cardId}
               </b>
               <button
@@ -228,7 +222,7 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
               alt={altText}
               style={{ width: '100%', maxHeight: '70vh', objectFit: 'contain', borderRadius: '6px' }}
             />
-            <p style={{ margin: '10px 0 0', fontSize: '11.5px', color: 'var(--c-rose)', textAlign: 'center' }}>
+            <p style={{ margin: '10px 0 0', fontSize: '11.5px', color: 'var(--text-secondary)', textAlign: 'center' }}>
               {altText}
             </p>
           </div>
@@ -245,20 +239,18 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
           style={{ zIndex: 300 }}
         >
           <div
-            className="glass-panel"
+            className="glass-panel eval-hint-modal-content"
             style={{
               maxWidth: '520px',
               width: '90%',
-              padding: '20px',
-              background: '#1b0d17',
-              border: '1px solid var(--c-copper)'
+              padding: '20px'
             }}
             onClick={(e) => e.stopPropagation()}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '18px' }}>💡</span>
-                <b style={{ color: 'var(--c-peach)', fontSize: '14px' }}>
+                <b style={{ color: 'var(--c-copper)', fontSize: '14px', fontWeight: 800 }}>
                   Explicación Sencilla de Términos (Ayuda)
                 </b>
               </div>
@@ -272,11 +264,11 @@ export const EvaluationVisualCard: React.FC<EvaluationVisualCardProps> = ({
               </button>
             </div>
 
-            <div style={{ fontSize: '13px', lineHeight: 1.6, color: '#fcebe6', background: '#11070e', padding: '14px', borderRadius: '8px', border: '1px solid #331525', marginBottom: '16px' }}>
+            <div className="eval-hint-modal-body" style={{ fontSize: '13px', lineHeight: 1.6, padding: '14px', borderRadius: '8px', marginBottom: '16px' }}>
               {hintText}
             </div>
 
-            <p style={{ margin: '0 0 16px 0', fontSize: '11px', color: 'var(--c-rose)' }}>
+            <p className="eval-hint-modal-disclaimer" style={{ margin: '0 0 16px 0', fontSize: '11px' }}>
               * Esta ayuda explica conceptos generales sin revelar la respuesta de la pregunta. El uso de pistas queda registrado en la sesión para análisis pedagógico.
             </p>
 
