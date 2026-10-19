@@ -171,8 +171,7 @@ export const CombatGame: React.FC = () => {
 
                 <button
                   type="button"
-                  className="cyber-btn cyber-btn-outline"
-                  style={{ width: '100%', marginTop: '12px', fontSize: '11px', padding: '6px' }}
+                  className="cyber-btn cyber-btn-outline fighter-inspect-btn"
                   onClick={() => inspectCard(cardA)}
                 >
                   🔍 Inspeccionar Ficha Completa
@@ -283,8 +282,7 @@ export const CombatGame: React.FC = () => {
 
                 <button
                   type="button"
-                  className="cyber-btn cyber-btn-outline"
-                  style={{ width: '100%', marginTop: '12px', fontSize: '11px', padding: '6px' }}
+                  className="cyber-btn cyber-btn-outline fighter-inspect-btn"
                   onClick={() => inspectCard(cardB)}
                 >
                   🔍 Inspeccionar Ficha Completa
@@ -311,7 +309,7 @@ export const CombatGame: React.FC = () => {
 
           <div className="history-grid">
             {combats.length === 0 ? (
-              <p className="empty-hist" style={{ color: 'var(--c-rose)', fontSize: '12px' }}>
+              <p className="empty-hist">
                 Aún no has emitido veredictos en el ring. Evalúa el primer enfrentamiento arriba para alimentar las deducciones críticas de tu marco teórico.
               </p>
             ) : (
