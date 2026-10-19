@@ -1,0 +1,66 @@
+\documentclass[tikz,border=0pt]{standalone}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{positioning}
+
+\definecolor{MTCInk}{RGB}{24,28,35}
+\definecolor{MTCMuted}{RGB}{92,102,112}
+\definecolor{MTCLine}{RGB}{214,220,226}
+\definecolor{MTCBg}{RGB}{250,251,252}
+\definecolor{MTCTeal}{RGB}{0,128,128}
+\definecolor{MTCBlue}{RGB}{38,94,170}
+\definecolor{MTCRed}{RGB}{176,54,54}
+\definecolor{MTCAmber}{RGB}{184,118,24}
+\definecolor{MTCGreen}{RGB}{52,132,82}
+\definecolor{MTCViolet}{RGB}{106,76,147}
+\definecolor{MTCGray}{RGB}{88,96,105}
+
+\newcommand{\CardCategoryColor}{MTCBlue}
+\newcommand{\CardID}{MTC00}
+\newcommand{\CardCategory}{Category}
+\newcommand{\CardQuality}{Q?}
+\newcommand{\CardTitle}{Short evidence title}
+\newcommand{\CardEvidenceType}{Evidence type}
+\newcommand{\CardCoreIdea}{One central idea written in plain language.}
+\newcommand{\CardContribution}{Main contribution of the source, written without exaggeration.}
+\newcommand{\CardLimitation}{Limitation or caution that prevents overclaiming.}
+\newcommand{\CardTrace}{SourceKey | Year}
+
+\newcommand{\EvidenceCard}{%
+\begin{tikzpicture}[x=1mm,y=1mm]
+  \fill[MTCBg] (0,0) rectangle (90,90);
+  \draw[MTCLine,line width=0.35mm] (0.5,0.5) rectangle (89.5,89.5);
+
+  \fill[\CardCategoryColor] (0,78) rectangle (90,90);
+  \node[anchor=west,text=white,font=\bfseries\fontsize{8.5}{9.5}\selectfont] at (4,84) {\CardID};
+  \node[anchor=east,text=white,font=\bfseries\fontsize{7}{8}\selectfont] at (86,84) {\CardQuality};
+  \node[anchor=west,text=white,font=\fontsize{6.5}{7.5}\selectfont] at (4,79.8) {\CardCategory};
+
+  \node[anchor=north west,text=MTCInk,font=\bfseries\fontsize{9.2}{10.2}\selectfont,text width=82mm] at (4,74) {\CardTitle};
+
+  \draw[MTCLine] (4,59.5) -- (86,59.5);
+  \node[anchor=west,text=\CardCategoryColor,font=\bfseries\fontsize{6.7}{7.5}\selectfont] at (4,56.5) {\CardEvidenceType};
+  \node[anchor=north west,text=MTCInk,font=\fontsize{7.2}{8.2}\selectfont,text width=82mm] at (4,53.3) {\CardCoreIdea};
+
+  \draw[MTCLine] (4,36.5) -- (86,36.5);
+  \node[anchor=west,text=MTCMuted,font=\bfseries\fontsize{6.4}{7.2}\selectfont] at (4,33.6) {Main contribution};
+  \node[anchor=north west,text=MTCInk,font=\fontsize{6.9}{7.8}\selectfont,text width=82mm] at (4,30.8) {\CardContribution};
+
+  \draw[MTCLine] (4,17.5) -- (86,17.5);
+  \node[anchor=west,text=MTCRed,font=\bfseries\fontsize{6.4}{7.2}\selectfont] at (4,14.6) {Limitation / caution};
+  \node[anchor=north west,text=MTCInk,font=\fontsize{6.5}{7.2}\selectfont,text width=82mm] at (4,12) {\CardLimitation};
+
+  \fill[white] (0,0) rectangle (90,6.3);
+  \draw[MTCLine] (0,6.3) -- (90,6.3);
+  \node[anchor=west,text=MTCMuted,font=\fontsize{5.2}{6}\selectfont] at (4,3.1) {\CardTrace};
+\end{tikzpicture}%
+}
+
+\begin{document}
+\EvidenceCard
+\end{document}

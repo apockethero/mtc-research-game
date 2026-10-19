@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production build artifacts
+dist/
+dist-ssr/
+*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+Thumbs.db
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment & Credentials (Secrets)
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+*.pem
+*.key
+*.cert
+credentials.json
+id_rsa
+id_ed25519
+
+# Temporary scripts & scratch files
+scripts/find_*.mjs
+scripts/check_*.mjs
+scripts/search_*.mjs
+scripts/make_backup.mjs
+
+# Public directory junction (canonical source tracked at root /card_redesign)
+public/card_redesign
+

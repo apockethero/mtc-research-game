@@ -1,0 +1,489 @@
+{
+  "MTC01": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3029318840",
+    "openAlexSource": "https://openalex.org/S4210233756",
+    "openAlexSourceName": "International Journal of Automobile Engineering Research and Development"
+  },
+  "MTC02": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W2547602269",
+    "openAlexSource": "https://openalex.org/S4306402512",
+    "openAlexSourceName": "HAL (Le Centre pour la Communication Scientifique Directe)"
+  },
+  "MTC03": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W2023552923",
+    "openAlexSource": "https://openalex.org/S128754310",
+    "openAlexSourceName": "Applied Mechanics and Materials"
+  },
+  "MTC04": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 18,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4384563478",
+    "openAlexSource": "https://openalex.org/S4210191901",
+    "openAlexSourceName": "Energy Conversion and Management X"
+  },
+  "MTC05": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4394989112",
+    "openAlexSource": "https://openalex.org/S4387282513",
+    "openAlexSourceName": "International Research Journal of Modernization in Engineering Technology and Science"
+  },
+  "MTC06": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4394917505",
+    "openAlexSource": "https://openalex.org/S4210187594",
+    "openAlexSourceName": "Journal of Physics Conference Series"
+  },
+  "MTC07": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 9,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4382938021",
+    "openAlexSource": "https://openalex.org/S4210206676",
+    "openAlexSourceName": "International Journal of Electrical and Electronics Research"
+  },
+  "MTC08": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 4,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3021761099",
+    "openAlexSource": "https://openalex.org/S4210187594",
+    "openAlexSourceName": "Journal of Physics Conference Series"
+  },
+  "MTC09": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3186752113",
+    "openAlexSource": "https://openalex.org/S145649206",
+    "openAlexSourceName": "Intelligent Service Robotics"
+  },
+  "MTC10": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 7,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3081534933",
+    "openAlexSource": "https://openalex.org/S4210205812",
+    "openAlexSourceName": "Applied Sciences"
+  },
+  "MTC11": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 3,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W2904878527",
+    "openAlexSource": "https://openalex.org/S185389193",
+    "openAlexSourceName": "Advances in Mechanical Engineering"
+  },
+  "MTC12": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "lookup-failed:404",
+    "citedByCount": null,
+    "venueHIndex": null,
+    "openAlexWork": null,
+    "openAlexSource": null
+  },
+  "MTC13": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 6,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3111482197",
+    "openAlexSource": "https://openalex.org/S145845289",
+    "openAlexSourceName": "Assistive Technology"
+  },
+  "MTC14": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "no-local-doi",
+    "citedByCount": null,
+    "venueHIndex": null,
+    "openAlexWork": null,
+    "openAlexSource": null
+  },
+  "MTC15": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 5,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4303633971",
+    "openAlexSource": "https://openalex.org/S4210210796",
+    "openAlexSourceName": "International Journal of Engineering and Advanced Technology"
+  },
+  "MTC16": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3040140912",
+    "openAlexSource": "https://openalex.org/S2764905038",
+    "openAlexSourceName": "Advances in intelligent systems and computing"
+  },
+  "MTC17": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4416686773",
+    "openAlexSource": "https://openalex.org/S4210240841",
+    "openAlexSourceName": "INTERANTIONAL JOURNAL OF SCIENTIFIC RESEARCH IN ENGINEERING AND MANAGEMENT"
+  },
+  "MTC18": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 19,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4229041872",
+    "openAlexSource": "https://openalex.org/S4210217608",
+    "openAlexSourceName": "Infrastructures"
+  },
+  "MTC19": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 3,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4214935568",
+    "openAlexSource": "https://openalex.org/S4210219396",
+    "openAlexSourceName": "International Journal of Engineering Sciences"
+  },
+  "MTC20": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 2,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3198613319",
+    "openAlexSource": "https://openalex.org/S4210172046",
+    "openAlexSourceName": "Smart innovation, systems and technologies"
+  },
+  "MTC21": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4313406062",
+    "openAlexSource": "https://openalex.org/S4377196312",
+    "openAlexSourceName": "Qucosa (Saxon State and University Library Dresden)"
+  },
+  "MTC22": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 24,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4225271117",
+    "openAlexSource": "https://openalex.org/S59320183",
+    "openAlexSourceName": "Vehicle System Dynamics"
+  },
+  "MTC23": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 15,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W2761992802",
+    "openAlexSource": "https://openalex.org/S45181156",
+    "openAlexSourceName": "Transportation Research Part D Transport and Environment"
+  },
+  "MTC24": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 1,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4304776351",
+    "openAlexSource": "https://openalex.org/S2738126797",
+    "openAlexSourceName": "Transport Problems"
+  },
+  "MTC25": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4367281478",
+    "openAlexSource": "https://openalex.org/S2764696622",
+    "openAlexSourceName": "AIP conference proceedings"
+  },
+  "MTC26": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 44,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3120086841",
+    "openAlexSource": "https://openalex.org/S4210186378",
+    "openAlexSourceName": "Proceedings of the Institution of Mechanical Engineers Part K Journal of Multi-body Dynamics"
+  },
+  "MTC27": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 2,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4205509903",
+    "openAlexSource": "https://openalex.org/S4306515541",
+    "openAlexSourceName": "Journal of Engineering and Sustainable Development"
+  },
+  "MTC28": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 15,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4393376043",
+    "openAlexSource": "https://openalex.org/S135521267",
+    "openAlexSourceName": "Noise & Vibration Worldwide"
+  },
+  "MTC29": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 2,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4392239200",
+    "openAlexSource": "https://openalex.org/S4306401280",
+    "openAlexSourceName": "DOAJ (DOAJ: Directory of Open Access Journals)"
+  },
+  "MTC30": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 4,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4385987553",
+    "openAlexSource": "https://openalex.org/S4210219839",
+    "openAlexSourceName": "Machines"
+  },
+  "MTC31": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 3,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4308722223",
+    "openAlexSource": "https://openalex.org/S2596399182",
+    "openAlexSourceName": "Frontiers in Mechanical Engineering"
+  },
+  "MTC32": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 6,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4205495697",
+    "openAlexSource": "https://openalex.org/S4210201771",
+    "openAlexSourceName": "International Journal of Emerging Trends in Engineering Research"
+  },
+  "MTC33": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 5,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3177801008",
+    "openAlexSource": "https://openalex.org/S4210233587",
+    "openAlexSourceName": "Vehicles"
+  },
+  "MTC34": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 15,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W1964788299",
+    "openAlexSource": "https://openalex.org/S178238111",
+    "openAlexSourceName": "Mathematical Problems in Engineering"
+  },
+  "MTC35": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 17,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3017380551",
+    "openAlexSource": "https://openalex.org/S2764685988",
+    "openAlexSourceName": "International Journal of Performability Engineering"
+  },
+  "MTC36": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 10,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W2897803653",
+    "openAlexSource": "https://openalex.org/S178238111",
+    "openAlexSourceName": "Mathematical Problems in Engineering"
+  },
+  "MTC37": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 3,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4399382256",
+    "openAlexSource": "https://openalex.org/S4210205812",
+    "openAlexSourceName": "Applied Sciences"
+  },
+  "MTC38": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W2971266024",
+    "openAlexSource": "https://openalex.org/S2764566388",
+    "openAlexSourceName": "International Journal for Research in Applied Science and Engineering Technology"
+  },
+  "MTC39": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 3,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3126601277",
+    "openAlexSource": "https://openalex.org/S2764696622",
+    "openAlexSourceName": "AIP conference proceedings"
+  },
+  "MTC40": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4377987185",
+    "openAlexSource": "https://openalex.org/S4210179954",
+    "openAlexSourceName": "Lecture notes in electrical engineering"
+  },
+  "MTC41": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 4,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3015276308",
+    "openAlexSource": "https://openalex.org/S2764905038",
+    "openAlexSourceName": "Advances in intelligent systems and computing"
+  },
+  "MTC42": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 2,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4285391603",
+    "openAlexSource": "https://openalex.org/S10134376",
+    "openAlexSourceName": "Sustainability"
+  },
+  "MTC43": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 9,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3185813869",
+    "openAlexSource": "https://openalex.org/S93626530",
+    "openAlexSourceName": "International Journal of Automotive Technology"
+  },
+  "MTC44": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 0,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4382134712",
+    "openAlexSource": "https://openalex.org/S2913398011",
+    "openAlexSourceName": "World Electric Vehicle Journal"
+  },
+  "MTC45": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 20,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W2916703679",
+    "openAlexSource": "https://openalex.org/S4210186093",
+    "openAlexSourceName": "E3S Web of Conferences"
+  },
+  "MTC46": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 1,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W3163568863",
+    "openAlexSource": "https://openalex.org/S4393919366",
+    "openAlexSourceName": "Advances in Social Science, Education and Humanities Research/Advances in social science, education and humanities research"
+  },
+  "MTC47": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 1,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4388782438",
+    "openAlexSource": "https://openalex.org/S2764779785",
+    "openAlexSourceName": "Research in Transportation Business & Management"
+  },
+  "MTC48": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "no-local-doi",
+    "citedByCount": null,
+    "venueHIndex": null,
+    "openAlexWork": null,
+    "openAlexSource": null
+  },
+  "MTC49": {
+    "source": "OpenAlex",
+    "queryDate": "2026-06-28",
+    "status": "ok",
+    "citedByCount": 6,
+    "venueHIndex": null,
+    "openAlexWork": "https://openalex.org/W4225302275",
+    "openAlexSource": "https://openalex.org/S101593883",
+    "openAlexSourceName": "Clean Technologies and Environmental Policy"
+  }
+}

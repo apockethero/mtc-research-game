@@ -1,0 +1,25 @@
+{
+  "name": "mtc-game-prototype",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test tests/verify_migration.mjs tests/behavioral_validation.test.mjs tests/button_styles.test.mjs",
+    "postinstall": "node -e \"const fs = require('fs'); if (!fs.existsSync('public/card_redesign')) { try { fs.symlinkSync('../card_redesign', 'public/card_redesign', 'junction'); } catch(e){} }\""
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10"
+  }
+}
