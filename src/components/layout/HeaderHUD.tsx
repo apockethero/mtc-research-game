@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSession } from '../../context/SessionContext';
+import { ThemeToggle } from './ThemeToggle';
 
 export const HeaderHUD: React.FC = () => {
   const {
@@ -18,6 +19,11 @@ export const HeaderHUD: React.FC = () => {
   return (
     <header className="top-hud">
       <div className="top-hud-container">
+        {/* Interruptor deslizante compacto de modo claro / oscuro */}
+        <div className="hud-theme-toggle-wrapper">
+          <ThemeToggle />
+        </div>
+
         {/* PRIMERA FILA: Título principal centrado horizontalmente con subtítulo centrado debajo */}
         <div className="hud-title-row">
           <div className="hud-brand-tag">
