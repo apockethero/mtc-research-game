@@ -8,7 +8,7 @@ import { MTC_CARDS_DATA } from '../data/cards/mtcCardsData';
 import { soundEngine } from '../services/soundEngine';
 import { buildFullSynthesisReport, getAllTrackedCards } from '../services/synthesisEngine';
 
-export type NavTab = 'deck' | 'timeline' | 'matrix' | 'gaphunter' | 'combat' | 'synthesis';
+export type NavTab = 'deck' | 'timeline' | 'matrix' | 'gaphunter' | 'combat' | 'evaluation' | 'synthesis';
 
 interface SessionContextValue {
   topic: TopicConfig;

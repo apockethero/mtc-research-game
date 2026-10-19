@@ -2256,3 +2256,23 @@ body {
     transition: none !important;
   }
 }
+
+/* =========================================================================
+   ESTILOS PARA EVALUACIÓN CIENTÍFICA
+   ========================================================================= */
+
+.eval-likert-row {
+  transition: border-color 0.2s ease;
+}
+
+.eval-likert-row:hover {
+  border-color: rgba(253, 153, 92, 0.3) !important;
+}
+
+@media (max-width: 650px) {
+  .eval-likert-row > div:nth-child(2) {
+    flex-direction: column;
+    align-items: flex-start !important;
+  }
+}
+

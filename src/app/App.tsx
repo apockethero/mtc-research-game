@@ -7,6 +7,7 @@ import { TimelineGame } from '../features/games/timeline/TimelineGame';
 import { MatrixGame } from '../features/games/matrix/MatrixGame';
 import { GapHunterGame } from '../features/games/gaphunter/GapHunterGame';
 import { CombatGame } from '../features/games/combat/CombatGame';
+import { EvaluationView } from '../features/evaluation/EvaluationView';
 import { SynthesisView } from '../features/synthesis/SynthesisView';
 import { WizardModal } from '../features/wizard/WizardModal';
 import { CardInspectorModal } from '../components/cards/CardInspectorModal';
@@ -26,6 +27,8 @@ export const App: React.FC = () => {
         return <GapHunterGame />;
       case 'combat':
         return <CombatGame />;
+      case 'evaluation':
+        return <EvaluationView />;
       case 'synthesis':
         return <SynthesisView />;
       default:

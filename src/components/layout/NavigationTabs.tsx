@@ -17,6 +17,7 @@ export const NavigationTabs: React.FC = () => {
     { id: 'matrix', label: 'La Matriz de Enfoques', icon: '🗂️', badge: stats.classifiedCount },
     { id: 'gaphunter', label: 'Cazadores de Vacíos', icon: '⚡', badge: stats.gapsCount },
     { id: 'combat', label: 'Combates de Validación', icon: '⚔️', badge: stats.combatsCount },
+    { id: 'evaluation', label: 'Evaluación científica', icon: '🧪' },
     { id: 'synthesis', label: 'Estado del Arte Vivo', icon: '📝' }
   ];
 
