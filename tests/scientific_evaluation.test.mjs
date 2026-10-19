@@ -28,7 +28,7 @@ test('2. Identificador de Sesión Aleatorio y Versión del Instrumento', async (
   assert.ok(fs.existsSync(scoringPath), 'evaluationScoring.ts debe existir');
 
   const content = fs.readFileSync(scoringPath, 'utf-8');
-  assert.ok(content.includes("INSTRUMENT_VERSION = '1.0.0-experimental'"), 'La versión debe ser 1.0.0-experimental');
+  assert.ok(content.includes("INSTRUMENT_VERSION = '1.1.0-multimodal-exp'"), 'La versión debe ser 1.1.0-multimodal-exp');
   assert.ok(content.includes("generateSessionId = ()"), 'generateSessionId debe estar implementada');
   assert.ok(content.includes('`MTC-EVAL-${rand}`'), 'El prefijo debe ser MTC-EVAL-');
 
@@ -198,4 +198,81 @@ test('7. Integridad de los Componentes Preexistentes: MTC01-MTC49 y Minijuegos',
   assert.ok(appContent.includes('<CombatGame />'), 'CombatGame debe estar presente');
   assert.ok(appContent.includes('<EvaluationView />'), 'EvaluationView debe estar presente');
   assert.ok(appContent.includes('<SynthesisView />'), 'SynthesisView debe estar presente');
+});
+
+test('8. Selector de Modalidades: Modo Guiado vs Modo de Investigación', async () => {
+  const typesPath = path.join(projectRoot, 'src/types/evaluation.ts');
+  const typesContent = fs.readFileSync(typesPath, 'utf-8');
+  assert.ok(typesContent.includes("export type EvaluationMode = 'guiado' | 'investigacion';"), 'EvaluationMode debe definir guiado e investigacion');
+  assert.ok(typesContent.includes('estudiante_colegio'), 'Debe incluir rol escolar para adolescentes');
+  assert.ok(typesContent.includes('publico_general'), 'Debe incluir rol para público general');
+
+  const viewPath = path.join(projectRoot, 'src/features/evaluation/EvaluationView.tsx');
+  const viewContent = fs.readFileSync(viewPath, 'utf-8');
+  assert.ok(viewContent.includes('Modo Guiado'), 'Debe existir la opción Modo Guiado');
+  assert.ok(viewContent.includes('Modo de Investigación'), 'Debe existir la opción Modo de Investigación');
+  assert.ok(viewContent.includes('setEvaluationMode'), 'Debe permitir cambiar entre modos');
+});
+
+test('9. Títulos Accesibles en Lenguaje Cotidiano y Subtítulos K1-K6', async () => {
+  const viewPath = path.join(projectRoot, 'src/features/evaluation/EvaluationView.tsx');
+  const viewContent = fs.readFileSync(viewPath, 'utf-8');
+
+  // Nombres cotidianos obligatorios
+  assert.ok(viewContent.includes('K1: Comprender las ideas'), 'K1 debe titularse "Comprender las ideas"');
+  assert.ok(viewContent.includes('K2: Comprobar la información'), 'K2 debe titularse "Comprobar la información"');
+  assert.ok(viewContent.includes('K3: Comparar dos estudios'), 'K3 debe titularse "Comparar dos estudios"');
+  assert.ok(viewContent.includes('K4: Conectar las ideas'), 'K4 debe titularse "Conectar las ideas"');
+  assert.ok(viewContent.includes('K5: Facilidad de uso'), 'K5 debe titularse "Facilidad de uso"');
+  assert.ok(viewContent.includes('K6: Esfuerzo y dificultad'), 'K6 debe titularse "Esfuerzo y dificultad"');
+
+  // Subtítulos con código técnico preservado
+  assert.ok(viewContent.includes('Criterio Metodológico K1'), 'Debe mantener el tag K1');
+  assert.ok(viewContent.includes('Criterio Metodológico K2'), 'Debe mantener el tag K2');
+  assert.ok(viewContent.includes('Criterio Metodológico K3'), 'Debe mantener el tag K3');
+  assert.ok(viewContent.includes('Criterio Metodológico K4'), 'Debe mantener el tag K4');
+  assert.ok(viewContent.includes('Criterios K5 y K6'), 'Debe mantener el tag K5/K6');
+});
+
+test('10. Evaluación Visual con Tarjetas Enmascaradas (EvaluationVisualCard)', async () => {
+  const compPath = path.join(projectRoot, 'src/features/evaluation/EvaluationVisualCard.tsx');
+  assert.ok(fs.existsSync(compPath), 'EvaluationVisualCard.tsx debe existir');
+
+  const compContent = fs.readFileSync(compPath, 'utf-8');
+  assert.ok(compContent.includes('maskAnswers'), 'Debe implementar propiedad maskAnswers');
+  assert.ok(compContent.includes('mask-overlay'), 'Debe contener la clase para enmascarar títulos y conclusiones');
+  assert.ok(compContent.includes('setIsZoomed'), 'Debe permitir zoom visual en pantalla modal');
+  assert.ok(compContent.includes('altText'), 'Debe contar con accesibilidad para lectores de pantalla');
+});
+
+test('11. Ayudas Opcionales, Telemetría de Pistas e Inicios de Frase (Sentence Starters)', async () => {
+  const typesPath = path.join(projectRoot, 'src/types/evaluation.ts');
+  const typesContent = fs.readFileSync(typesPath, 'utf-8');
+  assert.ok(typesContent.includes('hintsUsed: string[];'), 'Debe registrar hintsUsed en la sesión');
+  assert.ok(typesContent.includes('wasAssistedByQuestion'), 'Debe mapear asistencia por pregunta');
+
+  const scoringPath = path.join(projectRoot, 'src/services/evaluationScoring.ts');
+  const scoringContent = fs.readFileSync(scoringPath, 'utf-8');
+  assert.ok(scoringContent.includes('K4_GUIDED_SENTENCE_STARTERS'), 'Debe exportar los inicios de frase K4_GUIDED_SENTENCE_STARTERS');
+  assert.ok(scoringContent.includes('no_estoy_seguro'), 'Debe incluir opción "No estoy seguro/a"');
+
+  const hookPath = path.join(projectRoot, 'src/hooks/useEvaluationSession.ts');
+  const hookContent = fs.readFileSync(hookPath, 'utf-8');
+  assert.ok(hookContent.includes('recordHintUsed'), 'useEvaluationSession debe exportar recordHintUsed');
+});
+
+test('12. Exportación Diferenciada CSV/JSON y Salvaguardas Éticas para Menores', async () => {
+  const scoringPath = path.join(projectRoot, 'src/services/evaluationScoring.ts');
+  const scoringContent = fs.readFileSync(scoringPath, 'utf-8');
+
+  // Exportación JSON incluye modalidad
+  assert.ok(scoringContent.includes('evaluationMode: session.evaluationMode'), 'exportEvaluationJSON debe incluir evaluationMode');
+
+  // Exportación CSV incluye columnas de modalidad y telemetría
+  assert.ok(scoringContent.includes('evaluation_mode'), 'CSV debe incluir columna evaluation_mode');
+  assert.ok(scoringContent.includes('hints_count'), 'CSV debe incluir columna hints_count');
+
+  // Salvaguardas éticas
+  assert.ok(scoringContent.includes('ethicalSafeguard'), 'EVALUATION_CODEBOOK debe incluir ethicalSafeguard');
+  assert.ok(scoringContent.includes('adolescentes') || scoringContent.includes('menor'), 'EVALUATION_CODEBOOK debe contemplar participación de menores');
 });

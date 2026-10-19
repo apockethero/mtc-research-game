@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   EvaluationSessionData,
   EvaluationStage,
+  EvaluationMode,
   ParticipantProfile,
   K1Responses,
   K2Responses,
@@ -18,9 +19,10 @@ import {
 
 const EVAL_STORAGE_KEY = 'mtc_scientific_evaluation_session_v1';
 
-const createInitialSession = (): EvaluationSessionData => ({
+const createInitialSession = (defaultMode: EvaluationMode = 'guiado'): EvaluationSessionData => ({
   sessionId: generateSessionId(),
   instrumentVersion: INSTRUMENT_VERSION,
+  evaluationMode: defaultMode,
   startedAt: new Date().toISOString(),
   consentGiven: false,
   currentStage: 'stage_0_consent',
@@ -52,7 +54,9 @@ const createInitialSession = (): EvaluationSessionData => ({
   },
   k4Responses: {
     selectedCardIds: ['MTC01', 'MTC06', 'MTC43'],
+    synthesisSentenceStarter: 'Estos estudios se relacionan porque...',
     synthesisText: '',
+    transferSentenceStarter: 'Si tuviera que explicar este problema a otra persona, le diría que...',
     transferExplanationText: '',
     identifiedRelationshipsText: ''
   },
@@ -70,6 +74,8 @@ const createInitialSession = (): EvaluationSessionData => ({
   },
   qualitativeComments: {},
   cardsConsultedDuringSession: [],
+  hintsUsed: [],
+  wasAssistedByQuestion: {},
   isComplete: false,
   omittedOptionalFields: []
 });
@@ -82,14 +88,17 @@ export const useEvaluationSession = () => {
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && parsed.sessionId) {
-            return parsed;
+            return {
+              ...createInitialSession(parsed.evaluationMode || 'guiado'),
+              ...parsed
+            };
           }
         }
       }
     } catch (e) {
       console.warn('No se pudo cargar la sesión de evaluación de localStorage:', e);
     }
-    return createInitialSession();
+    return createInitialSession('guiado');
   });
 
   // Guardar en localStorage cada vez que la sesión cambie
@@ -102,6 +111,13 @@ export const useEvaluationSession = () => {
       console.warn('No se pudo guardar la sesión de evaluación en localStorage:', e);
     }
   }, [session]);
+
+  const setEvaluationMode = useCallback((mode: EvaluationMode) => {
+    setSession(prev => ({
+      ...prev,
+      evaluationMode: mode
+    }));
+  }, []);
 
   const updateConsent = useCallback((consent: boolean) => {
     setSession(prev => ({
@@ -159,6 +175,21 @@ export const useEvaluationSession = () => {
     }));
   }, []);
 
+  const recordHintUsed = useCallback((hintId: string, questionId: string) => {
+    setSession(prev => {
+      const alreadyUsed = prev.hintsUsed.includes(hintId);
+      const nextHints = alreadyUsed ? prev.hintsUsed : [...prev.hintsUsed, hintId];
+      return {
+        ...prev,
+        hintsUsed: nextHints,
+        wasAssistedByQuestion: {
+          ...prev.wasAssistedByQuestion,
+          [questionId]: true
+        }
+      };
+    });
+  }, []);
+
   const setStage = useCallback((stage: EvaluationStage) => {
     setSession(prev => ({
       ...prev,
@@ -168,7 +199,7 @@ export const useEvaluationSession = () => {
 
   const completeEvaluation = useCallback(() => {
     setSession(prev => {
-      const scores = calculateObjectiveScores(prev.k1Responses, prev.k2Responses);
+      const scores = calculateObjectiveScores(prev.k1Responses, prev.k2Responses, prev.evaluationMode);
       return {
         ...prev,
         isComplete: true,
@@ -180,7 +211,7 @@ export const useEvaluationSession = () => {
   }, []);
 
   const resetEvaluation = useCallback(() => {
-    const fresh = createInitialSession();
+    const fresh = createInitialSession('guiado');
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         window.localStorage.removeItem(EVAL_STORAGE_KEY);
@@ -193,6 +224,7 @@ export const useEvaluationSession = () => {
 
   return {
     session,
+    setEvaluationMode,
     updateConsent,
     updateProfile,
     updateK1,
@@ -201,6 +233,7 @@ export const useEvaluationSession = () => {
     updateK4,
     updateK5K6,
     updateComments,
+    recordHintUsed,
     setStage,
     completeEvaluation,
     resetEvaluation

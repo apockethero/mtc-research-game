@@ -5,6 +5,7 @@ import {
   K1_QUESTIONS,
   K2_QUESTIONS,
   K4_EVALUATION_RUBRIC,
+  K4_GUIDED_SENTENCE_STARTERS,
   exportEvaluationJSON,
   exportEvaluationCSV,
   calculateObjectiveScores
@@ -14,14 +15,17 @@ import {
   EducationLevel,
   DisciplinaryArea,
   DeviceType,
-  EvaluationStage
+  EvaluationStage,
+  EvaluationMode
 } from '../../types/evaluation';
+import { EvaluationVisualCard } from './EvaluationVisualCard';
 import { soundEngine } from '../../services/soundEngine';
 
 export const EvaluationView: React.FC = () => {
   const { deck, setActiveTab } = useSession();
   const {
     session,
+    setEvaluationMode,
     updateConsent,
     updateProfile,
     updateK1,
@@ -30,6 +34,7 @@ export const EvaluationView: React.FC = () => {
     updateK4,
     updateK5K6,
     updateComments,
+    recordHintUsed,
     setStage,
     completeEvaluation,
     resetEvaluation
@@ -38,15 +43,17 @@ export const EvaluationView: React.FC = () => {
   const [confirmDeleteModal, setConfirmDeleteModal] = useState<boolean>(false);
   const [validationAlert, setValidationAlert] = useState<string | null>(null);
 
+  const isGuided = session.evaluationMode === 'guiado';
+
   const stagesList: { id: EvaluationStage; label: string; short: string }[] = [
-    { id: 'stage_0_consent', label: '0. Consentimiento', short: '0' },
+    { id: 'stage_0_consent', label: '0. Inicio y Modo', short: '0' },
     { id: 'stage_a_profile', label: 'A. Perfil', short: 'A' },
-    { id: 'stage_b_k1', label: 'B. Comprensión (K1)', short: 'B' },
-    { id: 'stage_c_k2', label: 'C. Trazabilidad (K2)', short: 'C' },
-    { id: 'stage_d_k3', label: 'D. Comparación (K3)', short: 'D' },
-    { id: 'stage_e_k4', label: 'E. Síntesis (K4)', short: 'E' },
-    { id: 'stage_f_k5_k6', label: 'F. Usabilidad & Carga', short: 'F' },
-    { id: 'stage_g_comments', label: 'G. Comentarios', short: 'G' },
+    { id: 'stage_b_k1', label: 'B. K1: Comprender ideas', short: 'K1' },
+    { id: 'stage_c_k2', label: 'C. K2: Comprobar datos', short: 'K2' },
+    { id: 'stage_d_k3', label: 'D. K3: Comparar estudios', short: 'K3' },
+    { id: 'stage_e_k4', label: 'E. K4: Conectar ideas', short: 'K4' },
+    { id: 'stage_f_k5_k6', label: 'F. K5/K6: Uso y Esfuerzo', short: 'K5/6' },
+    { id: 'stage_g_comments', label: 'G. Sugerencias', short: 'G' },
     { id: 'stage_review', label: 'Revisión', short: 'Rev' }
   ];
 
@@ -72,13 +79,13 @@ export const EvaluationView: React.FC = () => {
     label: string,
     value: number | undefined,
     onChange: (val: number) => void,
-    leftLabel = 'Totalmente en desacuerdo (1)',
-    rightLabel = 'Totalmente de acuerdo (5)'
+    leftLabel = isGuided ? 'Nada de acuerdo (1)' : 'Totalmente en desacuerdo (1)',
+    rightLabel = isGuided ? 'Muy de acuerdo (5)' : 'Totalmente de acuerdo (5)'
   ) => (
     <div className="eval-likert-row" style={{ marginBottom: '14px', background: '#180d15', padding: '12px', borderRadius: '8px', border: '1px solid #331725' }}>
       <div style={{ fontSize: '13px', fontWeight: 600, color: '#fcebe6', marginBottom: '8px' }}>{label}</div>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '11px', color: 'var(--c-rose)', minWidth: '120px' }}>{leftLabel}</span>
+        <span style={{ fontSize: '11px', color: 'var(--c-rose)', minWidth: '130px' }}>{leftLabel}</span>
         <div style={{ display: 'flex', gap: '8px' }}>
           {[1, 2, 3, 4, 5].map(num => (
             <button
@@ -96,12 +103,12 @@ export const EvaluationView: React.FC = () => {
             className={`cyber-btn ${value === 0 ? 'cyber-btn-secondary' : 'cyber-btn-outline'}`}
             style={{ fontSize: '11px', padding: '0 8px', height: '36px' }}
             onClick={() => onChange(0)}
-            title="No puedo valorar este aspecto"
+            title="No puedo valorar este aspecto o no sé"
           >
-            N/V
+            No sé
           </button>
         </div>
-        <span style={{ fontSize: '11px', color: 'var(--c-rose)', minWidth: '120px', textAlign: 'right' }}>{rightLabel}</span>
+        <span style={{ fontSize: '11px', color: 'var(--c-rose)', minWidth: '130px', textAlign: 'right' }}>{rightLabel}</span>
       </div>
     </div>
   );
@@ -112,12 +119,26 @@ export const EvaluationView: React.FC = () => {
         {/* CABECERA DEL INSTRUMENTO */}
         <div className="game-header-bar" style={{ marginBottom: '16px' }}>
           <div>
-            <div className="game-tag" style={{ color: 'var(--c-peach)' }}>
-              INSTRUMENTO DE VALIDACIÓN CIENTÍFICA · VERSIÓN EXPERIMENTAL 1.0.0
+            <div className="game-tag" style={{ color: 'var(--c-peach)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>INSTRUMENTO DE VALIDACIÓN CIENTÍFICA · VERSIÓN 1.1.0</span>
+              <span
+                style={{
+                  background: isGuided ? 'var(--c-copper)' : 'var(--c-plum)',
+                  color: '#fff',
+                  padding: '2px 8px',
+                  borderRadius: '10px',
+                  fontSize: '10px',
+                  fontWeight: 800
+                }}
+              >
+                {isGuided ? '🌟 MODO GUIADO' : '🔬 MODO INVESTIGACIÓN'}
+              </span>
             </div>
             <h2 style={{ margin: '4px 0 6px', color: '#fff' }}>Evaluación Científica del Sistema MTC</h2>
             <p style={{ margin: 0, fontSize: '13px', color: 'var(--c-rose)' }}>
-              Instrumento piloto para recolectar datos empíricos sobre la comprensión, trazabilidad y utilidad del sistema de tarjetas de revisión.
+              {isGuided
+                ? 'Actividad visual y sencilla para aprender a interpretar investigaciones sobre triciclos eléctricos ligeros.'
+                : 'Instrumento piloto para recolectar datos empíricos sobre la comprensión, trazabilidad y utilidad del sistema de tarjetas de revisión.'}
             </p>
           </div>
           <div className="game-actions" style={{ alignItems: 'flex-end' }}>
@@ -142,7 +163,9 @@ export const EvaluationView: React.FC = () => {
           <div style={{ marginBottom: '20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px', color: 'var(--c-rose)' }}>
               <span>Etapa actual: <b>{stagesList[currentIdx]?.label}</b></span>
-              <span>Progreso: <b>{progressPercent}%</b></span>
+              <span>
+                Progreso: <b>{progressPercent}%</b> · Tiempo estimado: <b>{isGuided ? '~8-10 min' : '~12-15 min'}</b>
+              </span>
             </div>
             <div style={{ height: '6px', background: '#25121e', borderRadius: '3px', overflow: 'hidden' }}>
               <div
@@ -165,24 +188,75 @@ export const EvaluationView: React.FC = () => {
         )}
 
         {/* =========================================================================
-            ETAPA 0: INFORMACIÓN Y CONSENTIMIENTO
+            ETAPA 0: INFORMACIÓN, MODALIDAD Y CONSENTIMIENTO
             ========================================================================= */}
         {session.currentStage === 'stage_0_consent' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>0. Información y Consentimiento Informado</h3>
+            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>0. Inicio: Elige tu Modalidad y Consentimiento</h3>
             <p style={{ fontSize: '13.5px', lineHeight: 1.6, color: '#fcebe6' }}>
-              Te invitamos a participar de manera voluntaria en la evaluación exploratoria del sistema de tarjetas de revisión científica <b>MTC (Motor-Tricycle Cards)</b>. El propósito de este estudio es valorar si el modelo conceptual y relacional facilita la comprensión, comparación y síntesis de estados del arte especializados en vehículos eléctricos ligeros.
+              Bienvenido/a a la evaluación de <b>MTC Research Game</b>. Para ofrecerte la mejor experiencia según tu formación, elige la modalidad que prefieras:
             </p>
 
+            {/* Selector de Modalidades */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', marginBottom: '20px' }}>
+              {/* Opción 1: Modo Guiado */}
+              <div
+                onClick={() => setEvaluationMode('guiado')}
+                style={{
+                  cursor: 'pointer',
+                  padding: '16px',
+                  borderRadius: '10px',
+                  border: isGuided ? '2px solid var(--c-peach)' : '1px solid #3d1b2b',
+                  background: isGuided ? 'rgba(253, 153, 92, 0.12)' : '#190d16',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <b style={{ color: 'var(--c-peach)', fontSize: '15px' }}>🌟 Modo Guiado</b>
+                  {isGuided && <span style={{ color: '#4ade80', fontSize: '12px', fontWeight: 800 }}>✓ Seleccionado</span>}
+                </div>
+                <p style={{ margin: '0 0 8px 0', fontSize: '12.5px', color: '#fcebe6', lineHeight: 1.5 }}>
+                  Lenguaje cotidiano y directo, ayudas visuales paso a paso, pistas explicativas de términos difíciles y frases guía para sintetizar.
+                </p>
+                <div style={{ fontSize: '11px', color: 'var(--c-rose)' }}>
+                  Recomendado para: <b>Estudiantes de colegio, jóvenes y personas sin formación académica previa</b>. Tiempo: <b>~8-10 min</b>.
+                </div>
+              </div>
+
+              {/* Opción 2: Modo Investigación */}
+              <div
+                onClick={() => setEvaluationMode('investigacion')}
+                style={{
+                  cursor: 'pointer',
+                  padding: '16px',
+                  borderRadius: '10px',
+                  border: !isGuided ? '2px solid var(--c-peach)' : '1px solid #3d1b2b',
+                  background: !isGuided ? 'rgba(253, 153, 92, 0.12)' : '#190d16',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <b style={{ color: 'var(--c-peach)', fontSize: '15px' }}>🔬 Modo de Investigación</b>
+                  {!isGuided && <span style={{ color: '#4ade80', fontSize: '12px', fontWeight: 800 }}>✓ Seleccionado</span>}
+                </div>
+                <p style={{ margin: '0 0 8px 0', fontSize: '12.5px', color: '#fcebe6', lineHeight: 1.5 }}>
+                  Preguntas metodológicas completas, comprobación de metadatos bibliométricos (DOI, cuartiles Scopus) y redacción académica formal.
+                </p>
+                <div style={{ fontSize: '11px', color: 'var(--c-rose)' }}>
+                  Recomendado para: <b>Estudiantes universitarios, tesistas, docentes e investigadores</b>. Tiempo: <b>~12-15 min</b>.
+                </div>
+              </div>
+            </div>
+
+            {/* Condiciones del Consentimiento */}
             <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', border: '1px solid #3d1b2a', marginBottom: '18px', fontSize: '12.5px', color: '#fcebe6' }}>
-              <h4 style={{ color: 'var(--c-rose)', margin: '0 0 8px 0', fontSize: '13px' }}>Términos de la Participación Exploratoria:</h4>
+              <h4 style={{ color: 'var(--c-rose)', margin: '0 0 8px 0', fontSize: '13px' }}>Términos y Salvaguardas Éticas:</h4>
               <ul style={{ paddingLeft: '20px', margin: 0, display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                <li><b>Finalidad:</b> Uso académico y exploratorio para comprobar la usabilidad y rigor del sistema piloto.</li>
-                <li><b>Carácter Voluntario:</b> Puedes suspender tu participación o abandonar la evaluación en cualquier momento sin ninguna consecuencia.</li>
-                <li><b>Almacenamiento Local:</b> Las respuestas se guardan provisionalmente en el almacenamiento local de tu navegador (<code>localStorage</code>) para permitir pausas. No se transfieren a servidores externos sin tu consentimiento de exportación.</li>
-                <li><b>Protección de Identidad:</b> No se solicita tu nombre, número de documento, dirección ni correo electrónico. Cada sesión utiliza un identificador aleatorio unívoco (<code>{session.sessionId}</code>).</li>
-                <li><b>Resultados Agregados:</b> Los análisis de respuestas se realizarán de manera agregada y con citas cualitativas anonimizadas.</li>
-                <li><b>Estado Experimental:</b> Este instrumento es una versión preliminar sujeta a retroalimentación y no constituye una prueba psicométrica formal certificada.</li>
+                <li><b>Finalidad:</b> Estudio exploratorio para evaluar si las tarjetas ayudan a entender el estado del arte.</li>
+                <li><b>Participación Libre:</b> Es voluntaria y puedes retirarte en cualquier momento sin penalización.</li>
+                <li><b>Privacidad:</b> No solicitamos tu nombre, teléfono, DNI ni email. Las respuestas se asocian al código aleatorio <code>{session.sessionId}</code>.</li>
+                <li><b>Almacenamiento Local:</b> Las respuestas se guardan en tu propio navegador. No se envían a servidores externos automáticamente.</li>
+                <li><b>Salvaguarda para Menores de Edad:</b> Si este instrumento se utiliza en un estudio formal con niños o adolescentes, se deben gestionar previamente las autorizaciones del colegio y el consentimiento de padres o tutores legales.</li>
               </ul>
             </div>
 
@@ -194,7 +268,7 @@ export const EvaluationView: React.FC = () => {
                 style={{ marginTop: '3px', transform: 'scale(1.2)' }}
               />
               <span style={{ fontSize: '13px', color: '#fff' }}>
-                <b>He leído y comprendido las condiciones informadas</b>, y acepto libre y voluntariamente participar en esta evaluación exploratoria de MTC Research Game.
+                <b>He leído la información y acepto participar</b> en esta evaluación en <b>{isGuided ? 'Modo Guiado' : 'Modo de Investigación'}</b>.
               </span>
             </label>
 
@@ -204,35 +278,39 @@ export const EvaluationView: React.FC = () => {
                 disabled={!session.consentGiven}
                 onClick={() => handleNextStage('stage_a_profile')}
               >
-                Comenzar Cuestionario →
+                Comenzar Evaluación en {isGuided ? 'Modo Guiado 🌟' : 'Modo Investigación 🔬'} →
               </button>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            ETAPA A: PERFIL Y FAMILIARIDAD PREVIA
+            ETAPA A: PERFIL DEL PARTICIPANTE
             ========================================================================= */}
         {session.currentStage === 'stage_a_profile' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa A. Perfil del Participante y Familiaridad Previa</h3>
+            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa A. Cuéntanos sobre ti (Perfil)</h3>
             <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              Por favor, indica tu contexto formativo y nivel de experiencia. No se requieren datos personales de identificación directa.
+              {isGuided
+                ? 'Indica tu nivel de estudios o rol general para entender cómo se adaptan las tarjetas a diferentes personas. No pedimos datos personales.'
+                : 'Por favor, indica tu contexto formativo y nivel de experiencia técnica para contextualizar la evaluación.'}
             </p>
 
             <div className="form-grid" style={{ marginBottom: '16px' }}>
               <div className="form-group">
-                <label>Rol Académico o Profesional:</label>
+                <label>Tu Rol o Actividad Principal:</label>
                 <select
                   className="cyber-select full-width"
                   value={session.profile.academicRole || ''}
                   onChange={(e) => updateProfile({ academicRole: e.target.value as AcademicRole })}
                 >
                   <option value="">-- Seleccionar --</option>
-                  <option value="estudiante_pregrado">Estudiante de Pregrado</option>
+                  <option value="estudiante_colegio">Estudiante de Colegio / Secundaria</option>
+                  <option value="estudiante_pregrado">Estudiante Universitario (Pregrado)</option>
                   <option value="estudiante_posgrado">Estudiante de Posgrado (Maestría / Doctorado)</option>
                   <option value="docente_investigador">Docente / Investigador Académico</option>
-                  <option value="profesional_industria">Profesional de la Industria / Ingeniero</option>
+                  <option value="profesional_industria">Profesional / Técnico de la Industria</option>
+                  <option value="publico_general">Público General / Aficionado a la Tecnología</option>
                   <option value="otro">Otro</option>
                   <option value="prefiero_no_responder">Prefiero no responder</option>
                 </select>
@@ -241,7 +319,7 @@ export const EvaluationView: React.FC = () => {
                     type="text"
                     className="cyber-input"
                     style={{ marginTop: '8px' }}
-                    placeholder="Especifica tu rol"
+                    placeholder="Especifica tu actividad"
                     value={session.profile.academicRoleOther || ''}
                     onChange={(e) => updateProfile({ academicRoleOther: e.target.value })}
                   />
@@ -256,6 +334,7 @@ export const EvaluationView: React.FC = () => {
                   onChange={(e) => updateProfile({ educationLevel: e.target.value as EducationLevel })}
                 >
                   <option value="">-- Seleccionar --</option>
+                  <option value="primaria_secundaria">Secundaria o Básica en curso o terminada</option>
                   <option value="tecnico_tecnologo">Técnico / Tecnólogo</option>
                   <option value="pregrado">Pregrado Universitario</option>
                   <option value="maestria">Maestría / Especialización</option>
@@ -267,7 +346,7 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             <div className="form-group" style={{ marginBottom: '18px' }}>
-              <label>Área Disciplinar:</label>
+              <label>Área o Interés Principal:</label>
               <select
                 className="cyber-select full-width"
                 value={session.profile.disciplinaryArea || ''}
@@ -275,33 +354,39 @@ export const EvaluationView: React.FC = () => {
               >
                 <option value="">-- Seleccionar --</option>
                 <option value="mecanica_automotriz">Ingeniería Mecánica / Automotriz / Transporte</option>
-                <option value="electrica_electronica">Ingeniería Eléctrica / Electrónica / Potencia</option>
-                <option value="sistemas_computacion_ia">Sistemas / Computación / Ciencia de Datos / IA</option>
-                <option value="transporte_logistica">Movilidad Urbana / Logística / Planificación</option>
-                <option value="ciencias_ambientales_sostenibilidad">Ciencias Ambientales / Sostenibilidad</option>
+                <option value="electrica_electronica">Electricidad / Electrónica / Energías Limpias</option>
+                <option value="sistemas_computacion_ia">Sistemas / Computación / Tecnología Digital</option>
+                <option value="transporte_logistica">Movilidad Urbana / Tránsito / Logística</option>
+                <option value="ciencias_ambientales_sostenibilidad">Medio Ambiente / Ecología / Sostenibilidad</option>
+                <option value="educacion_ciencias_sociales">Educación / Ciencias Sociales</option>
+                <option value="sin_formacion_especifica">Sin área específica / Interés general</option>
                 <option value="otra">Otra</option>
                 <option value="prefiero_no_responder">Prefiero no responder</option>
               </select>
             </div>
 
             {renderLikertRow(
-              'Familiaridad previa con la redacción o lectura de estados del arte (literature reviews):',
+              isGuided
+                ? '¿Qué tanta experiencia previa tienes leyendo artículos de investigación o estados del arte?'
+                : 'Familiaridad previa con la redacción o lectura de estados del arte (literature reviews):',
               session.profile.priorFamiliarityStateOfArt,
               (val) => updateProfile({ priorFamiliarityStateOfArt: val }),
-              'Nula (1)',
-              'Experta (5)'
+              'Ninguna experiencia (1)',
+              'Mucha experiencia (5)'
             )}
 
             {renderLikertRow(
-              'Familiaridad previa con vehículos utilitarios eléctricos o triciclos motorizados:',
+              isGuided
+                ? '¿Qué tanto conocías antes sobre vehículos o triciclos eléctricos?'
+                : 'Familiaridad previa con vehículos utilitarios eléctricos o triciclos motorizados:',
               session.profile.priorFamiliarityElectricTricycles,
               (val) => updateProfile({ priorFamiliarityElectricTricycles: val }),
-              'Nula (1)',
-              'Muy alta (5)'
+              'Casi nada (1)',
+              'Conozco bastante (5)'
             )}
 
             <div className="form-group" style={{ marginTop: '14px' }}>
-              <label>Tipo de Dispositivo Utilizado en esta Sesión:</label>
+              <label>Tipo de Dispositivo Utilizado:</label>
               <select
                 className="cyber-select"
                 value={session.profile.deviceType || 'escritorio_laptop'}
@@ -321,36 +406,58 @@ export const EvaluationView: React.FC = () => {
                 className="cyber-btn cyber-btn-primary"
                 onClick={() => {
                   if (!session.profile.academicRole || !session.profile.educationLevel || !session.profile.disciplinaryArea) {
-                    setValidationAlert('Por favor selecciona tu rol, nivel de formación y área disciplinar antes de continuar.');
+                    setValidationAlert('Por favor selecciona tu rol, nivel y área principal antes de continuar.');
                     return;
                   }
                   handleNextStage('stage_b_k1');
                 }}
               >
-                Siguiente (K1: Comprensión) →
+                Siguiente (K1: Comprender las ideas) →
               </button>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            ETAPA B: K1 COMPRENSIÓN CONCEPTUAL
+            ETAPA B: K1 COMPRENDER LAS IDEAS
             ========================================================================= */}
         {session.currentStage === 'stage_b_k1' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa B. Criterio K1: Comprensión Conceptual del Estado del Arte</h3>
-            <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              Responde a las siguientes preguntas objetivas diseñadas a partir de las tarjetas y metadatos reales del corpus MTC.
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+                Etapa B. K1: Comprender las ideas
+              </h3>
+              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+                Criterio Metodológico K1
+              </span>
+            </div>
+            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+              {isGuided
+                ? 'Objetivo: Vamos a ver si puedes entender qué propone cada estudio observando sus esquemas técnicos, qué pruebas hicieron y qué límites tienen.'
+                : 'Objetivo: Evaluar la comprensión conceptual, la distinción de evidencia y el reconocimiento de aportes y limitaciones metodológicas.'}
             </p>
 
-            {/* B1: Aporte principal */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #381827' }}>
+            {/* B1: Aporte principal con soporte visual MTC09 */}
+            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
               <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
-                1. {K1_QUESTIONS.q1CoreContribution.prompt}
+                1. {isGuided ? K1_QUESTIONS.q1CoreContribution.promptGuided : K1_QUESTIONS.q1CoreContribution.promptResearch}
               </div>
+
+              {/* Tarjeta visual técnica enmascarada */}
+              <EvaluationVisualCard
+                cardId="MTC09"
+                customTitle="Esquema Técnico de Estudio MTC09"
+                altText={K1_QUESTIONS.q1CoreContribution.visualAlt}
+                hintId={K1_QUESTIONS.q1CoreContribution.hintId}
+                hintText={K1_QUESTIONS.q1CoreContribution.hintText}
+                onHintUsed={(hId) => recordHintUsed(hId, 'k1_q1')}
+                wasHintUsed={Boolean(session.wasAssistedByQuestion?.['k1_q1'])}
+                maskAnswers={true}
+              />
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {K1_QUESTIONS.q1CoreContribution.options.map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6' }}>
+                {(isGuided ? K1_QUESTIONS.q1CoreContribution.optionsGuided : K1_QUESTIONS.q1CoreContribution.optionsResearch).map((opt) => (
+                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
                     <input
                       type="radio"
                       name="q1Core"
@@ -364,16 +471,34 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* B2: Tipos de Evidencia */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
-                2. {K1_QUESTIONS.q2EvidenceTypes.prompt}
+            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
+              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '6px' }}>
+                2. {isGuided ? K1_QUESTIONS.q2EvidenceTypes.promptGuided : K1_QUESTIONS.q2EvidenceTypes.promptResearch}
               </div>
+              <p style={{ fontSize: '12px', color: 'var(--c-rose)', margin: '0 0 12px 0' }}>
+                {isGuided
+                  ? 'Cada investigación usó un método distinto: computadora (simulación), taller (prototipo) o mediciones en ruta (experimento).'
+                  : 'Distingue simulación numérica, prototipado físico y pruebas experimentales en banco/ruta.'}
+              </p>
+
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
                 {K1_QUESTIONS.q2EvidenceTypes.items.map((item) => (
-                  <div key={item.cardId} style={{ background: '#22111d', padding: '10px', borderRadius: '6px' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--c-peach)', marginBottom: '4px' }}>
-                      {item.cardId}: {item.authorYear}
+                  <div key={item.cardId} style={{ background: '#22111d', padding: '12px', borderRadius: '8px', border: '1px solid #3d1c2c' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--c-peach)', marginBottom: '6px' }}>
+                      {item.authorYear}
                     </div>
+
+                    <EvaluationVisualCard
+                      cardId={item.cardId}
+                      customTitle={`Ilustración ${item.cardId}`}
+                      altText={item.visualAlt}
+                      maskAnswers={true}
+                      hintId={K1_QUESTIONS.q2EvidenceTypes.hintId}
+                      hintText={K1_QUESTIONS.q2EvidenceTypes.hintText}
+                      onHintUsed={(hId) => recordHintUsed(hId, 'k1_q2')}
+                      wasHintUsed={Boolean(session.wasAssistedByQuestion?.['k1_q2'])}
+                    />
+
                     <select
                       className="cyber-select full-width"
                       value={
@@ -391,8 +516,8 @@ export const EvaluationView: React.FC = () => {
                         if (item.cardId === 'MTC22') updateK1({ q2EvidenceTypes: { ...prev, mtc22Type: val } });
                       }}
                     >
-                      <option value="">-- Seleccionar Enfoque --</option>
-                      {item.options.map(o => (
+                      <option value="">-- Seleccionar Cómo se Hizo --</option>
+                      {(isGuided ? item.optionsGuided : item.optionsResearch).map(o => (
                         <option key={o.id} value={o.id}>{o.text}</option>
                       ))}
                     </select>
@@ -401,14 +526,26 @@ export const EvaluationView: React.FC = () => {
               </div>
             </div>
 
-            {/* B3: Limitación metodológica */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #381827' }}>
+            {/* B3: Limitación metodológica con soporte visual MTC06 */}
+            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
               <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
-                3. {K1_QUESTIONS.q3MethodologicalLimitation.prompt}
+                3. {isGuided ? K1_QUESTIONS.q3MethodologicalLimitation.promptGuided : K1_QUESTIONS.q3MethodologicalLimitation.promptResearch}
               </div>
+
+              <EvaluationVisualCard
+                cardId="MTC06"
+                customTitle="Esquema Técnico de Estudio MTC06"
+                altText={K1_QUESTIONS.q3MethodologicalLimitation.visualAlt}
+                hintId={K1_QUESTIONS.q3MethodologicalLimitation.hintId}
+                hintText={K1_QUESTIONS.q3MethodologicalLimitation.hintText}
+                onHintUsed={(hId) => recordHintUsed(hId, 'k1_q3')}
+                wasHintUsed={Boolean(session.wasAssistedByQuestion?.['k1_q3'])}
+                maskAnswers={true}
+              />
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {K1_QUESTIONS.q3MethodologicalLimitation.options.map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6' }}>
+                {(isGuided ? K1_QUESTIONS.q3MethodologicalLimitation.optionsGuided : K1_QUESTIONS.q3MethodologicalLimitation.optionsResearch).map((opt) => (
+                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
                     <input
                       type="radio"
                       name="q3Limit"
@@ -422,13 +559,32 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* B4: Resultado vs Hipótesis */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #381827' }}>
+            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
               <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
-                4. {K1_QUESTIONS.q4TechnicalResultVsHypothesis.prompt}
+                4. {isGuided ? K1_QUESTIONS.q4TechnicalResultVsHypothesis.promptGuided : K1_QUESTIONS.q4TechnicalResultVsHypothesis.promptResearch}
               </div>
+
+              {K1_QUESTIONS.q4TechnicalResultVsHypothesis.hintText && (
+                <div style={{ marginBottom: '10px' }}>
+                  <button
+                    type="button"
+                    className="cyber-btn cyber-btn-outline"
+                    style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--c-peach)' }}
+                    onClick={() => recordHintUsed(K1_QUESTIONS.q4TechnicalResultVsHypothesis.hintId, 'k1_q4')}
+                  >
+                    💡 Pista: ¿Cómo distinguir un dato medido de una suposición?
+                  </button>
+                  {session.wasAssistedByQuestion?.['k1_q4'] && (
+                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#ffd2be', background: '#11070e', padding: '8px 12px', borderRadius: '6px' }}>
+                      {K1_QUESTIONS.q4TechnicalResultVsHypothesis.hintText}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {K1_QUESTIONS.q4TechnicalResultVsHypothesis.options.map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6' }}>
+                {(isGuided ? K1_QUESTIONS.q4TechnicalResultVsHypothesis.optionsGuided : K1_QUESTIONS.q4TechnicalResultVsHypothesis.optionsResearch).map((opt) => (
+                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
                     <input
                       type="radio"
                       name="q4Result"
@@ -453,39 +609,61 @@ export const EvaluationView: React.FC = () => {
                     !session.k1Responses.q3MethodologicalLimitation ||
                     !session.k1Responses.q4TechnicalResultVsHypothesis
                   ) {
-                    setValidationAlert('Por favor responde las 4 preguntas de comprensión antes de continuar.');
+                    setValidationAlert('Por favor responde las preguntas de comprensión (o marca "No estoy seguro/a") antes de continuar.');
                     return;
                   }
                   handleNextStage('stage_c_k2');
                 }}
               >
-                Siguiente (K2: Trazabilidad) →
+                Siguiente (K2: Comprobar la información) →
               </button>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            ETAPA C: K2 TRAZABILIDAD BIBLIOMÉTRICA
+            ETAPA C: K2 COMPROBAR LA INFORMACIÓN (TRAZABILIDAD)
             ========================================================================= */}
         {session.currentStage === 'stage_c_k2' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa C. Criterio K2: Trazabilidad y Verificación Bibliográfica</h3>
-            <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              La trazabilidad científica evalúa la capacidad de verificar metadatos de fuentes primarias y entender el significado de indicadores disponibles o pendientes.
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+                Etapa C. K2: Comprobar la información
+              </h3>
+              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+                Criterio Metodológico K2
+              </span>
+            </div>
+            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+              {isGuided
+                ? 'Objetivo: Vamos a comprobar si puedes ubicar de dónde sale un estudio científico y qué hacer cuando un dato de calidad todavía no está confirmado.'
+                : 'Objetivo: Evaluar la localización e interpretación de metadatos de fuentes primarias, persistencia DOI y tratamiento de indicadores pendientes o ausentes.'}
             </p>
 
-            {/* C1: Localizar metadatos */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #381827' }}>
+            {/* C1: Localizar metadatos MTC43 */}
+            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
               <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '8px' }}>
-                1. {K2_QUESTIONS.q1LocateMetadata.prompt}
+                1. {isGuided ? K2_QUESTIONS.q1LocateMetadata.promptGuided : K2_QUESTIONS.q1LocateMetadata.promptResearch}
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--c-rose)', margin: '0 0 12px 0' }}>
-                Puedes apoyarte en la pestaña "Mazo Completo" o en los datos de MTC43 del piloto.
-              </p>
+
+              {/* Ficha técnica visible para comprobar */}
+              <EvaluationVisualCard
+                cardId="MTC43"
+                customTitle="Ficha de Trazabilidad MTC43"
+                altText={K2_QUESTIONS.q1LocateMetadata.visualAlt}
+                showMetadata={true}
+                maskAnswers={false}
+                hintId={K2_QUESTIONS.q1LocateMetadata.hintId}
+                hintText={K2_QUESTIONS.q1LocateMetadata.hintText}
+                onHintUsed={(hId) => recordHintUsed(hId, 'k2_q1')}
+                wasHintUsed={Boolean(session.wasAssistedByQuestion?.['k2_q1'])}
+              />
+
               <div className="form-grid">
                 <div>
-                  <label style={{ fontSize: '12px', color: 'var(--c-rose)' }}>DOI o Identificador:</label>
+                  <label style={{ fontSize: '12px', color: 'var(--c-rose)' }}>
+                    {isGuided ? 'Identificador digital (DOI):' : 'DOI de la fuente primaria:'}
+                  </label>
                   <input
                     type="text"
                     className="cyber-input"
@@ -512,7 +690,7 @@ export const EvaluationView: React.FC = () => {
                 </div>
               </div>
               <div style={{ marginTop: '10px' }}>
-                <label style={{ fontSize: '12px', color: 'var(--c-rose)' }}>Tipo Documental Primario:</label>
+                <label style={{ fontSize: '12px', color: 'var(--c-rose)' }}>Tipo de Documento:</label>
                 <select
                   className="cyber-select full-width"
                   value={session.k2Responses.q1LocateMetadata?.docType || ''}
@@ -522,22 +700,41 @@ export const EvaluationView: React.FC = () => {
                   }}
                 >
                   <option value="">-- Seleccionar --</option>
-                  <option value="articulo_revista">Artículo en Revista Indexada (Journal Article)</option>
-                  <option value="conferencia">Acta de Conferencia (Conference Proceedings)</option>
-                  <option value="capitulo_libro">Capítulo de Libro Técnico</option>
-                  <option value="informe_tecnico">Informe Técnico no Indexado</option>
+                  <option value="articulo_revista">Artículo en Revista Especializada (Journal)</option>
+                  <option value="conferencia">Artículo de Congreso o Conferencia</option>
+                  <option value="capitulo_libro">Capítulo de Libro</option>
+                  <option value="no_estoy_seguro">No estoy seguro/a</option>
                 </select>
               </div>
             </div>
 
-            {/* C2: Indicadores ausentes/pendientes */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #381827' }}>
+            {/* C2: Indicadores ausentes o pendientes */}
+            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
               <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
-                2. {K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.prompt}
+                2. {isGuided ? K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.promptGuided : K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.promptResearch}
               </div>
+
+              {K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.hintText && (
+                <div style={{ marginBottom: '10px' }}>
+                  <button
+                    type="button"
+                    className="cyber-btn cyber-btn-outline"
+                    style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--c-peach)' }}
+                    onClick={() => recordHintUsed(K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.hintId, 'k2_q2')}
+                  >
+                    💡 Pista: ¿Qué pasa cuando falta un dato de calidad?
+                  </button>
+                  {session.wasAssistedByQuestion?.['k2_q2'] && (
+                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#ffd2be', background: '#11070e', padding: '8px 12px', borderRadius: '6px' }}>
+                      {K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.hintText}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.options.map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6' }}>
+                {(isGuided ? K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.optionsGuided : K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.optionsResearch).map((opt) => (
+                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
                     <input
                       type="radio"
                       name="q2Pending"
@@ -551,13 +748,32 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* C3: Trazabilidad vs Citas secundarias */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '18px', border: '1px solid #381827' }}>
+            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
               <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
-                3. {K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.prompt}
+                3. {isGuided ? K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.promptGuided : K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.promptResearch}
               </div>
+
+              {K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.hintText && (
+                <div style={{ marginBottom: '10px' }}>
+                  <button
+                    type="button"
+                    className="cyber-btn cyber-btn-outline"
+                    style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--c-peach)' }}
+                    onClick={() => recordHintUsed(K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.hintId, 'k2_q3')}
+                  >
+                    💡 Pista: ¿Por qué ir directo a la fuente original?
+                  </button>
+                  {session.wasAssistedByQuestion?.['k2_q3'] && (
+                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#ffd2be', background: '#11070e', padding: '8px 12px', borderRadius: '6px' }}>
+                      {K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.hintText}
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.options.map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6' }}>
+                {(isGuided ? K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.optionsGuided : K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.optionsResearch).map((opt) => (
+                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
                     <input
                       type="radio"
                       name="q3Audit"
@@ -581,33 +797,47 @@ export const EvaluationView: React.FC = () => {
                     !session.k2Responses.q2MissingOrPendingIndicatorInterpretation ||
                     !session.k2Responses.q3TraceabilityVsSecondaryCitation
                   ) {
-                    setValidationAlert('Por favor responde las preguntas sobre indicadores ausentes y auditabilidad de fuentes.');
+                    setValidationAlert('Por favor responde las preguntas sobre comprobación de datos antes de continuar.');
                     return;
                   }
                   handleNextStage('stage_d_k3');
                 }}
               >
-                Siguiente (K3: Comparación) →
+                Siguiente (K3: Comparar dos estudios) →
               </button>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            ETAPA D: K3 COMPARACIÓN ENTRE INVESTIGACIONES
+            ETAPA D: K3 COMPARAR DOS ESTUDIOS (SIDE-BY-SIDE)
             ========================================================================= */}
         {session.currentStage === 'stage_d_k3' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa D. Criterio K3: Comparación Crítica entre Investigaciones</h3>
-            <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              Selecciona al menos dos tarjetas del corpus y contrasta sus enfoques, métodos y limitaciones.
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+                Etapa D. K3: Comparar dos estudios
+              </h3>
+              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+                Criterio Metodológico K3
+              </span>
+            </div>
+            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+              {isGuided
+                ? 'Objetivo: Vamos a poner dos investigaciones frente a frente. Elige dos tarjetas para compararlas lado a lado y describe qué hace cada una.'
+                : 'Objetivo: Contrastar dos antecedentes del corpus, evaluar diferencias de método, contexto o limitaciones y registrar el nivel de confianza analítica.'}
             </p>
 
-            <div className="form-grid" style={{ marginBottom: '16px' }}>
-              <div>
-                <label>Tarjeta Referencial (Base):</label>
+            {/* Comparador Lado a Lado (Side-by-Side) */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '18px' }}>
+              {/* Tarjeta 1 */}
+              <div style={{ background: '#190d16', padding: '14px', borderRadius: '8px', border: '1px solid #3d1b2b' }}>
+                <label style={{ fontSize: '12px', color: 'var(--c-peach)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+                  Investigación A (Base):
+                </label>
                 <select
                   className="cyber-select full-width"
+                  style={{ marginBottom: '10px' }}
                   value={session.k3Responses.selectedCardIds?.[0] || 'MTC06'}
                   onChange={(e) => {
                     const ids = [...(session.k3Responses.selectedCardIds || ['MTC06', 'MTC09'])];
@@ -617,16 +847,26 @@ export const EvaluationView: React.FC = () => {
                 >
                   {deck.map(c => (
                     <option key={c.id} value={c.id}>
-                      {c.id} · {c.firstAuthor} ({c.year}) - {c.title.slice(0, 36)}...
+                      {c.id} · {c.firstAuthor} ({c.year}) - {c.title.slice(0, 32)}...
                     </option>
                   ))}
                 </select>
+
+                <EvaluationVisualCard
+                  cardId={session.k3Responses.selectedCardIds?.[0] || 'MTC06'}
+                  altText={`Ilustración de la investigación ${session.k3Responses.selectedCardIds?.[0] || 'MTC06'}`}
+                  maskAnswers={false}
+                />
               </div>
 
-              <div>
-                <label>Tarjeta de Contraste (Desafiante):</label>
+              {/* Tarjeta 2 */}
+              <div style={{ background: '#190d16', padding: '14px', borderRadius: '8px', border: '1px solid #3d1b2b' }}>
+                <label style={{ fontSize: '12px', color: 'var(--c-peach)', fontWeight: 700, display: 'block', marginBottom: '6px' }}>
+                  Investigación B (Contraste):
+                </label>
                 <select
                   className="cyber-select full-width"
+                  style={{ marginBottom: '10px' }}
                   value={session.k3Responses.selectedCardIds?.[1] || 'MTC09'}
                   onChange={(e) => {
                     const ids = [...(session.k3Responses.selectedCardIds || ['MTC06', 'MTC09'])];
@@ -636,56 +876,78 @@ export const EvaluationView: React.FC = () => {
                 >
                   {deck.map(c => (
                     <option key={c.id} value={c.id}>
-                      {c.id} · {c.firstAuthor} ({c.year}) - {c.title.slice(0, 36)}...
+                      {c.id} · {c.firstAuthor} ({c.year}) - {c.title.slice(0, 32)}...
                     </option>
                   ))}
                 </select>
+
+                <EvaluationVisualCard
+                  cardId={session.k3Responses.selectedCardIds?.[1] || 'MTC09'}
+                  altText={`Ilustración de la investigación ${session.k3Responses.selectedCardIds?.[1] || 'MTC09'}`}
+                  maskAnswers={false}
+                />
               </div>
             </div>
 
             <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label>Criterio Principal de Comparación:</label>
+              <label>{isGuided ? '¿Qué aspecto quieres comparar entre ambas?' : 'Criterio Principal de Comparación:'}</label>
               <select
                 className="cyber-select full-width"
                 value={session.k3Responses.comparisonCriterion || 'metodologia'}
                 onChange={(e) => updateK3({ comparisonCriterion: e.target.value as any })}
               >
-                <option value="metodologia">Metodología (ej. Simulación CAE vs Ensayos Físicos)</option>
-                <option value="contribucion">Contribución Técnica (Aporte de diseño o algoritmo)</option>
-                <option value="alcance_aplicacion">Alcance de Aplicación (Carga urbana vs Pasajeros)</option>
-                <option value="limitaciones">Limitaciones Reportadas (Vacíos metodológicos cruzados)</option>
-                <option value="otro">Otro</option>
+                <option value="metodologia">
+                  {isGuided ? 'Cómo hicieron el trabajo (Simulación en computadora vs Construcción física)' : 'Metodología (ej. Simulación CAE vs Ensayos Físicos)'}
+                </option>
+                <option value="contribucion">
+                  {isGuided ? 'Qué inventó o resolvió cada una (Aporte técnico)' : 'Contribución Técnica (Aporte de diseño o algoritmo)'}
+                </option>
+                <option value="alcance_aplicacion">
+                  {isGuided ? 'Para qué se usa (Reparto de carga vs Transporte de personas)' : 'Alcance de Aplicación (Carga urbana vs Pasajeros)'}
+                </option>
+                <option value="limitaciones">
+                  {isGuided ? 'Qué le faltó probar a cada una (Límites y vacíos)' : 'Limitaciones Reportadas (Vacíos metodológicos cruzados)'}
+                </option>
+                <option value="otro">Otro criterio</option>
               </select>
             </div>
 
             <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label>Diferencias Metodológicas o de Hallazgos:</label>
+              <label>{isGuided ? '¿En qué se diferencian principalmente?' : 'Diferencias Metodológicas o de Hallazgos:'}</label>
               <textarea
                 className="cyber-input"
                 rows={3}
-                placeholder="Explica qué diferencias esenciales existen entre ambos antecedentes respecto al criterio seleccionado..."
+                placeholder={
+                  isGuided
+                    ? 'Por ejemplo: la primera tarjeta probó un chasis de acero en computadora, mientras que la segunda diseñó un mecanismo de inclinación para que no se vuelque...'
+                    : 'Explica qué diferencias metodológicas o empíricas esenciales existen entre ambos antecedentes...'
+                }
                 value={session.k3Responses.differencesText || ''}
                 onChange={(e) => updateK3({ differencesText: e.target.value })}
               />
             </div>
 
             <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label>Similitudes o Puntos de Convergencia:</label>
+              <label>{isGuided ? '¿En qué se parecen o qué tienen en común?' : 'Similitudes o Puntos de Convergencia:'}</label>
               <textarea
                 className="cyber-input"
                 rows={2}
-                placeholder="Menciona qué elementos teóricos o empíricos comparten..."
+                placeholder={
+                  isGuided
+                    ? 'Por ejemplo: ambas buscan que el triciclo sea más seguro para circular en la ciudad...'
+                    : 'Menciona qué elementos teóricos o empíricos comparten...'
+                }
                 value={session.k3Responses.similaritiesText || ''}
                 onChange={(e) => updateK3({ similaritiesText: e.target.value })}
               />
             </div>
 
             {renderLikertRow(
-              '¿Qué nivel de confianza tienes en tu comparación?',
+              isGuided ? '¿Qué tan seguro/a te sientes de tu comparación?' : 'Nivel de confianza analítica en tu comparación:',
               session.k3Responses.confidenceLevel,
               (val) => updateK3({ confidenceLevel: val }),
-              'Muy baja confianza (1)',
-              'Muy alta confianza (5)'
+              'Poco seguro/a (1)',
+              'Muy seguro/a (5)'
             )}
 
             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
@@ -696,30 +958,39 @@ export const EvaluationView: React.FC = () => {
                 className="cyber-btn cyber-btn-primary"
                 onClick={() => {
                   if (!session.k3Responses.differencesText?.trim()) {
-                    setValidationAlert('Por favor redacta las diferencias metodológicas o de hallazgos entre las tarjetas seleccionadas.');
+                    setValidationAlert('Por favor escribe en qué se diferencian las dos investigaciones.');
                     return;
                   }
                   handleNextStage('stage_e_k4');
                 }}
               >
-                Siguiente (K4: Síntesis) →
+                Siguiente (K4: Conectar las ideas) →
               </button>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            ETAPA E: K4 SÍNTESIS Y TRANSFERENCIA
+            ETAPA E: K4 CONECTAR LAS IDEAS (SÍNTESIS Y TRANSFERENCIA)
             ========================================================================= */}
         {session.currentStage === 'stage_e_k4' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa E. Criterio K4: Síntesis y Transferencia Académica</h3>
-            <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              Conecta al menos tres investigaciones del corpus para formular una síntesis argumentativa y realiza una tarea de transferencia hacia público no especializado.
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+                Etapa E. K4: Conectar las ideas
+              </h3>
+              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+                Criterio Metodológico K4
+              </span>
+            </div>
+            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+              {isGuided
+                ? 'Objetivo: Une tres investigaciones para contar una historia completa y explica la idea principal con tus propias palabras a alguien que no conoce el tema.'
+                : 'Objetivo: Evaluar la capacidad de sintetizar aportes cruzados entre al menos tres antecedentes y realizar una transferencia divulgativa rigurosa.'}
             </p>
 
-            <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label>Tarjetas Conectadas para la Síntesis (Mínimo 3):</label>
+            <div className="form-group" style={{ marginBottom: '18px' }}>
+              <label>{isGuided ? 'Elige 3 investigaciones para conectarlas:' : 'Tarjetas Conectadas para la Síntesis (Mínimo 3):'}</label>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px' }}>
                 {[0, 1, 2].map(idx => (
                   <select
@@ -734,7 +1005,7 @@ export const EvaluationView: React.FC = () => {
                   >
                     {deck.map(c => (
                       <option key={c.id} value={c.id}>
-                        {c.id} · {c.firstAuthor} ({c.year})
+                        {c.id} · {c.firstAuthor} ({c.year}) - {c.title.slice(0, 24)}...
                       </option>
                     ))}
                   </select>
@@ -742,37 +1013,104 @@ export const EvaluationView: React.FC = () => {
               </div>
             </div>
 
-            <div className="form-group" style={{ marginBottom: '16px' }}>
-              <label>Síntesis Integradora de Vacíos y Aportes:</label>
+            {/* Síntesis integradora */}
+            <div className="form-group" style={{ marginBottom: '18px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{ margin: 0 }}>
+                  {isGuided ? '1. ¿Cómo se conectan o complementan estos 3 estudios?' : '1. Síntesis Integradora de Vacíos y Aportes:'}
+                </label>
+              </div>
+
+              {/* En Modo Guiado: Píldoras de frases incompletas (Sentence Starters) */}
+              {isGuided && (
+                <div style={{ marginBottom: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--c-peach)', alignSelf: 'center' }}>Frases de inicio:</span>
+                  {K4_GUIDED_SENTENCE_STARTERS.synthesis.map((starter, sIdx) => (
+                    <button
+                      key={sIdx}
+                      type="button"
+                      className="cyber-btn cyber-btn-outline"
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
+                      onClick={() => {
+                        updateK4({
+                          synthesisSentenceStarter: starter,
+                          synthesisText: session.k4Responses.synthesisText ? `${starter} ${session.k4Responses.synthesisText}` : `${starter} `
+                        });
+                      }}
+                    >
+                      "{starter.slice(0, 28)}..."
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <textarea
                 className="cyber-input"
-                rows={4}
-                placeholder="Redacta un párrafo conectando cómo los aportes y limitaciones de las tarjetas seleccionadas justifican una nueva investigación..."
+                rows={3}
+                placeholder={
+                  isGuided
+                    ? 'Escribe cómo lo que hace uno ayuda a resolver lo que al otro le faltó...'
+                    : 'Redacta un párrafo conectando cómo los aportes y limitaciones de las tarjetas seleccionadas justifican una nueva investigación...'
+                }
                 value={session.k4Responses.synthesisText || ''}
                 onChange={(e) => updateK4({ synthesisText: e.target.value })}
               />
             </div>
 
-            <div className="form-group" style={{ marginBottom: '18px' }}>
-              <label>Tarea de Transferencia: Explicación para una Persona no Especializada:</label>
+            {/* Tarea de transferencia */}
+            <div className="form-group" style={{ marginBottom: '20px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <label style={{ margin: 0 }}>
+                  {isGuided ? '2. ¿Cómo se lo explicarías a otra persona de forma sencilla?' : '2. Tarea de Transferencia hacia Público no Especializado:'}
+                </label>
+              </div>
+
+              {isGuided && (
+                <div style={{ marginBottom: '8px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '11px', color: 'var(--c-peach)', alignSelf: 'center' }}>Frases de inicio:</span>
+                  {K4_GUIDED_SENTENCE_STARTERS.transfer.map((starter, sIdx) => (
+                    <button
+                      key={sIdx}
+                      type="button"
+                      className="cyber-btn cyber-btn-outline"
+                      style={{ fontSize: '11px', padding: '3px 8px' }}
+                      onClick={() => {
+                        updateK4({
+                          transferSentenceStarter: starter,
+                          transferExplanationText: session.k4Responses.transferExplanationText
+                            ? `${starter} ${session.k4Responses.transferExplanationText}`
+                            : `${starter} `
+                        });
+                      }}
+                    >
+                      "{starter.slice(0, 30)}..."
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <textarea
                 className="cyber-input"
                 rows={3}
-                placeholder="¿Cómo le explicarías a un transportista o ciudadano común por qué es importante resolver los desafíos técnicos identificados en estos artículos?"
+                placeholder={
+                  isGuided
+                    ? 'Imagínate que le explicas a un chofer o a un vecino por qué los ingenieros deben resolver este problema...'
+                    : '¿Cómo le explicarías a un transportista o ciudadano no técnico por qué es importante resolver los desafíos técnicos identificados?'
+                }
                 value={session.k4Responses.transferExplanationText || ''}
                 onChange={(e) => updateK4({ transferExplanationText: e.target.value })}
               />
             </div>
 
-            {/* Rúbrica de evaluación transparente para revisión por pares */}
+            {/* Rúbrica de evaluación de 7 criterios */}
             <div style={{ background: '#190d16', padding: '14px', borderRadius: '8px', border: '1px solid #381827', marginBottom: '18px' }}>
               <h4 style={{ color: 'var(--c-peach)', margin: '0 0 6px 0', fontSize: '13px' }}>
-                📋 Rúbrica de Evaluación Auditable (Para Revisión Posterior por Pares)
+                📋 Rúbrica de 7 Criterios para Revisión por Pares
               </h4>
               <p style={{ fontSize: '11.5px', color: 'var(--c-rose)', margin: '0 0 10px 0' }}>
-                Tus respuestas abiertas no reciben puntajes artificiales opacos; se evalúan mediante esta matriz de 7 dimensiones:
+                Tus respuestas abiertas se conservan íntegras para que un evaluador humano las valore de forma transparente con esta pauta:
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px', fontSize: '11px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px', fontSize: '11px' }}>
                 {K4_EVALUATION_RUBRIC.map(crit => (
                   <div key={crit.criterionId} style={{ background: '#22111d', padding: '8px', borderRadius: '4px' }}>
                     <b style={{ color: '#fff' }}>{crit.name}</b>
@@ -790,81 +1128,132 @@ export const EvaluationView: React.FC = () => {
                 className="cyber-btn cyber-btn-primary"
                 onClick={() => {
                   if (!session.k4Responses.synthesisText?.trim() || !session.k4Responses.transferExplanationText?.trim()) {
-                    setValidationAlert('Por favor completa tanto la síntesis integradora como la explicación de transferencia.');
+                    setValidationAlert('Por favor completa tanto la conexión de ideas como la explicación sencilla.');
                     return;
                   }
                   handleNextStage('stage_f_k5_k6');
                 }}
               >
-                Siguiente (K5/K6: Usabilidad & Carga) →
+                Siguiente (K5/K6: Uso y Esfuerzo) →
               </button>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            ETAPA F: K5 USABILIDAD Y K6 DEMANDA COGNITIVA
+            ETAPA F: K5 FACILIDAD DE USO Y K6 ESFUERZO / DIFICULTAD
             ========================================================================= */}
         {session.currentStage === 'stage_f_k5_k6' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa F. Criterios K5 (Usabilidad / Utilidad) y K6 (Demanda Cognitiva)</h3>
-            <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              Evalúa tu experiencia con la herramienta en escala de 1 a 5 (o marca N/V si no puedes valorar ese aspecto). Nota que el esfuerzo mental se evalúa por separado de la utilidad.
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <h3 style={{ color: 'var(--c-peach)', margin: 0 }}>
+                Etapa F. K5: Facilidad de uso y K6: Esfuerzo y dificultad
+              </h3>
+              <span style={{ fontSize: '11px', color: 'var(--c-rose)', background: '#25111d', padding: '3px 8px', borderRadius: '4px' }}>
+                Criterios K5 y K6
+              </span>
+            </div>
+            <p style={{ fontSize: '13px', color: '#fcebe6', marginBottom: '18px' }}>
+              {isGuided
+                ? 'Objetivo: Cuéntanos qué tan fácil te pareció la herramienta y cuánto esfuerzo mental sentiste al usarla. Elige del 1 al 5 o marca "No sé".'
+                : 'Objetivo: Evaluar dimensiones de usabilidad percibida (K5) y demanda cognitiva (K6) de manera diferenciada en escala Likert.'}
             </p>
 
-            <h4 style={{ color: 'var(--c-peach)', fontSize: '14px', margin: '14px 0 8px' }}>1. Usabilidad del Sistema (K5):</h4>
-            {renderLikertRow('Claridad y legibilidad de las tarjetas de revisión:', session.k5k6Responses.cardsClarity, (val) => updateK5K6({ cardsClarity: val }))}
-            {renderLikertRow('Facilidad de navegación entre minijuegos y vistas:', session.k5k6Responses.navigationEase, (val) => updateK5K6({ navigationEase: val }))}
-            {renderLikertRow('Facilidad para comparar investigaciones visualmente:', session.k5k6Responses.comparisonEase, (val) => updateK5K6({ comparisonEase: val }))}
-
-            <h4 style={{ color: 'var(--c-peach)', fontSize: '14px', margin: '18px 0 8px' }}>2. Utilidad Percibida:</h4>
-            {renderLikertRow('Utilidad para comprender la evolución del estado del arte:', session.k5k6Responses.utilityStateOfArt, (val) => updateK5K6({ utilityStateOfArt: val }))}
-            {renderLikertRow('Utilidad como herramienta didáctica en docencia universitaria:', session.k5k6Responses.utilityTeaching, (val) => updateK5K6({ utilityTeaching: val }))}
-            {renderLikertRow('Utilidad para estructurar una tesis de investigación real:', session.k5k6Responses.utilityResearch, (val) => updateK5K6({ utilityResearch: val }))}
-            {renderLikertRow('Confianza adquirida para explicar el tema a colegas o evaluadores:', session.k5k6Responses.confidenceExplaining, (val) => updateK5K6({ confidenceExplaining: val }))}
-
-            <h4 style={{ color: 'var(--c-peach)', fontSize: '14px', margin: '18px 0 8px' }}>3. Demanda Cognitiva y Carga de Trabajo (K6):</h4>
+            <h4 style={{ color: 'var(--c-peach)', fontSize: '14px', margin: '14px 0 8px' }}>
+              {isGuided ? '1. Facilidad y Claridad (K5):' : '1. Usabilidad del Sistema (K5):'}
+            </h4>
             {renderLikertRow(
-              'Esfuerzo mental requerido para operar el sistema de tarjetas:',
-              session.k5k6Responses.perceivedMentalEffort,
-              (val) => updateK5K6({ perceivedMentalEffort: val }),
-              'Esfuerzo muy bajo (1)',
-              'Esfuerzo mental extremo (5)'
+              isGuided ? '¿Las tarjetas fueron claras y fáciles de leer?' : 'Claridad y legibilidad de las tarjetas de revisión:',
+              session.k5k6Responses.cardsClarity,
+              (val) => updateK5K6({ cardsClarity: val })
             )}
             {renderLikertRow(
-              'Dificultad percibida para sintetizar la información del corpus:',
+              isGuided ? '¿Fue fácil moverse entre las pantallas y juegos?' : 'Facilidad de navegación entre minijuegos y vistas:',
+              session.k5k6Responses.navigationEase,
+              (val) => updateK5K6({ navigationEase: val })
+            )}
+            {renderLikertRow(
+              isGuided ? '¿Te resultó sencillo comparar dos tarjetas con las ilustraciones?' : 'Facilidad para comparar investigaciones visualmente:',
+              session.k5k6Responses.comparisonEase,
+              (val) => updateK5K6({ comparisonEase: val })
+            )}
+
+            <h4 style={{ color: 'var(--c-peach)', fontSize: '14px', margin: '18px 0 8px' }}>
+              {isGuided ? '2. ¿Para qué te sirvió la herramienta?' : '2. Utilidad Percibida:'}
+            </h4>
+            {renderLikertRow(
+              isGuided ? '¿Te ayudó a entender mejor la historia de los triciclos eléctricos?' : 'Utilidad para comprender la evolución del estado del arte:',
+              session.k5k6Responses.utilityStateOfArt,
+              (val) => updateK5K6({ utilityStateOfArt: val })
+            )}
+            {renderLikertRow(
+              isGuided ? '¿Sería útil para enseñar este tema en colegios o universidades?' : 'Utilidad como herramienta didáctica en docencia:',
+              session.k5k6Responses.utilityTeaching,
+              (val) => updateK5K6({ utilityTeaching: val })
+            )}
+            {renderLikertRow(
+              isGuided ? '¿Sería útil para proyectos de ingeniería o tesis reales?' : 'Utilidad para estructurar una investigación formal:',
+              session.k5k6Responses.utilityResearch,
+              (val) => updateK5K6({ utilityResearch: val })
+            )}
+            {renderLikertRow(
+              isGuided ? '¿Sientes mayor seguridad para hablar de este tema con otra persona?' : 'Confianza adquirida para explicar el tema:',
+              session.k5k6Responses.confidenceExplaining,
+              (val) => updateK5K6({ confidenceExplaining: val })
+            )}
+
+            <h4 style={{ color: 'var(--c-peach)', fontSize: '14px', margin: '18px 0 8px' }}>
+              {isGuided ? '3. Esfuerzo Mental y Dificultad (K6):' : '3. Demanda Cognitiva y Carga de Trabajo (K6):'}
+            </h4>
+            {renderLikertRow(
+              isGuided ? '¿Cuánto esfuerzo mental o concentración te exigió esta actividad?' : 'Esfuerzo mental requerido para operar el sistema de tarjetas:',
+              session.k5k6Responses.perceivedMentalEffort,
+              (val) => updateK5K6({ perceivedMentalEffort: val }),
+              isGuided ? 'Muy poco esfuerzo (1)' : 'Esfuerzo muy bajo (1)',
+              isGuided ? 'Muchísimo esfuerzo (5)' : 'Esfuerzo mental extremo (5)'
+            )}
+            {renderLikertRow(
+              isGuided ? '¿Qué tan difícil sentiste unir y resumir las tres investigaciones?' : 'Dificultad percibida para sintetizar la información del corpus:',
               session.k5k6Responses.synthesisDifficulty,
               (val) => updateK5K6({ synthesisDifficulty: val }),
-              'Muy fácil de sintetizar (1)',
-              'Extremadamente difícil (5)'
+              isGuided ? 'Muy fácil (1)' : 'Muy fácil de sintetizar (1)',
+              isGuided ? 'Muy difícil (5)' : 'Extremadamente difícil (5)'
             )}
 
             <h4 style={{ color: 'var(--c-peach)', fontSize: '14px', margin: '18px 0 8px' }}>4. Intención de Uso:</h4>
-            {renderLikertRow('Intención de volver a utilizar MTC Research Game en futuros proyectos:', session.k5k6Responses.intentionToReuse, (val) => updateK5K6({ intentionToReuse: val }))}
+            {renderLikertRow(
+              isGuided ? '¿Te gustaría volver a jugar o usar esta herramienta en el futuro?' : 'Intención de volver a utilizar MTC Research Game en futuros proyectos:',
+              session.k5k6Responses.intentionToReuse,
+              (val) => updateK5K6({ intentionToReuse: val }),
+              isGuided ? 'No me gustaría (1)' : 'No volvería a usarlo (1)',
+              isGuided ? 'Sí, me encantaría (5)' : 'Definitivamente sí (5)'
+            )}
 
             <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_e_k4')}>
                 ← Anterior
               </button>
               <button className="cyber-btn cyber-btn-primary" onClick={() => handleNextStage('stage_g_comments')}>
-                Siguiente (Comentarios Abiertos) →
+                Siguiente (Sugerencias) →
               </button>
             </div>
           </div>
         )}
 
         {/* =========================================================================
-            ETAPA G: COMENTARIOS ABIERTOS (OPCIONALES)
+            ETAPA G: SUGERENCIAS Y COMENTARIOS
             ========================================================================= */}
         {session.currentStage === 'stage_g_comments' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa G. Retroalimentación Cualitativa (Opcional)</h3>
+            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Etapa G. Sugerencias y Comentarios (Opcional)</h3>
             <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              Tus comentarios permitirán perfeccionar la ruta metodológica y el grafo de relaciones. Puedes omitir cualquier pregunta si lo prefieres.
+              {isGuided
+                ? 'Tus ideas nos ayudan a hacer la herramienta más divertida y clara. Puedes escribir lo que quieras o dejar campos en blanco.'
+                : 'Tus comentarios cualitativos permitirán perfeccionar la ruta metodológica y el grafo de relaciones. Puedes omitir cualquier pregunta.'}
             </p>
 
             <div className="form-group" style={{ marginBottom: '14px' }}>
-              <label>¿Qué aspecto de la aplicación te ayudó más a comprender el estado del arte?</label>
+              <label>{isGuided ? '¿Qué fue lo que más te gustó o más te ayudó a aprender?' : '¿Qué aspecto de la aplicación te ayudó más a comprender el estado del arte?'}</label>
               <textarea
                 className="cyber-input"
                 rows={2}
@@ -874,7 +1263,7 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             <div className="form-group" style={{ marginBottom: '14px' }}>
-              <label>¿Qué elemento resultó confuso, difícil o poco claro?</label>
+              <label>{isGuided ? '¿Hubo algo confuso, aburrido o difícil de entender?' : '¿Qué elemento resultó confuso, difícil o poco claro?'}</label>
               <textarea
                 className="cyber-input"
                 rows={2}
@@ -884,7 +1273,7 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             <div className="form-group" style={{ marginBottom: '14px' }}>
-              <label>¿Qué información adicional sentiste que faltó en las tarjetas?</label>
+              <label>{isGuided ? '¿Qué dibujo, dato o explicación sentiste que faltó?' : '¿Qué información adicional sentiste que faltó en las tarjetas?'}</label>
               <textarea
                 className="cyber-input"
                 rows={2}
@@ -894,17 +1283,7 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             <div className="form-group" style={{ marginBottom: '14px' }}>
-              <label>¿Detectaste algún problema de trazabilidad o consistencia en los datos bibliométricos?</label>
-              <textarea
-                className="cyber-input"
-                rows={2}
-                value={session.qualitativeComments.traceabilityIssuesObserved || ''}
-                onChange={(e) => updateComments({ traceabilityIssuesObserved: e.target.value })}
-              />
-            </div>
-
-            <div className="form-group" style={{ marginBottom: '14px' }}>
-              <label>¿Qué utilidad concreta tendría esta herramienta en tu propio contexto profesional o docente?</label>
+              <label>{isGuided ? '¿Cómo te gustaría que usemos esto en tu colegio, barrio o trabajo?' : '¿Qué utilidad concreta tendría esta herramienta en tu propio contexto profesional o docente?'}</label>
               <textarea
                 className="cyber-input"
                 rows={2}
@@ -925,56 +1304,55 @@ export const EvaluationView: React.FC = () => {
         )}
 
         {/* =========================================================================
-            PANTALLA DE REVISIÓN ANTES DEL ENVÍO
+            PANTALLA DE REVISIÓN
             ========================================================================= */}
         {session.currentStage === 'stage_review' && (
           <div className="glass-panel" style={{ padding: '24px' }}>
-            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Revisión Final de Respuestas</h3>
+            <h3 style={{ color: 'var(--c-peach)', marginTop: 0 }}>Revisión Final de tu Evaluación</h3>
             <p style={{ fontSize: '13px', color: 'var(--c-rose)', marginBottom: '18px' }}>
-              Por favor revisa el estado general de tu evaluación antes de confirmar el registro definitivo.
+              Comprueba el resumen de tus respuestas antes de registrar la sesión:
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px', marginBottom: '20px' }}>
               <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>0. Consentimiento:</b>
-                <div style={{ fontSize: '13px', color: session.consentGiven ? '#4ade80' : '#ff999f', marginTop: '4px' }}>
-                  {session.consentGiven ? '✓ Confirmado explícitamente' : '✗ Pendiente'}
+                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>Modalidad Seleccionada:</b>
+                <div style={{ fontSize: '13px', color: '#fff', marginTop: '4px' }}>
+                  {isGuided ? '🌟 Modo Guiado' : '🔬 Modo de Investigación'}
                 </div>
               </div>
 
               <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>A. Perfil:</b>
-                <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
-                  Rol: {session.profile.academicRole || 'No especificado'}<br />
-                  Nivel: {session.profile.educationLevel || 'No especificado'}
+                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>Pistas / Ayudas Consultadas:</b>
+                <div style={{ fontSize: '13px', color: session.hintsUsed?.length > 0 ? '#4ade80' : 'var(--c-rose)', marginTop: '4px' }}>
+                  {session.hintsUsed?.length || 0} pistas utilizadas
                 </div>
               </div>
 
               <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>B. Comprensión (K1):</b>
+                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>B. K1: Comprender las ideas:</b>
                 <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
                   4 de 4 tareas objetivas registradas
                 </div>
               </div>
 
               <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>C. Trazabilidad (K2):</b>
+                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>C. K2: Comprobar la información:</b>
                 <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
                   Metadatos y preguntas de verificación completadas
                 </div>
               </div>
 
               <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>D. Comparación (K3):</b>
+                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>D. K3: Comparar dos estudios:</b>
                 <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
-                  Contraste entre {(session.k3Responses.selectedCardIds || []).join(' y ')} ({session.k3Responses.differencesText?.length || 0} caracteres)
+                  Contraste entre {(session.k3Responses.selectedCardIds || []).join(' y ')}
                 </div>
               </div>
 
               <div style={{ background: '#190d16', padding: '12px', borderRadius: '6px', border: '1px solid #331725' }}>
-                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>E. Síntesis (K4):</b>
+                <b style={{ color: 'var(--c-peach)', fontSize: '12px' }}>E. K4: Conectar las ideas:</b>
                 <div style={{ fontSize: '12px', color: '#fff', marginTop: '4px' }}>
-                  Síntesis y transferencia de {(session.k4Responses.selectedCardIds || []).join(', ')}
+                  Síntesis de {(session.k4Responses.selectedCardIds || []).join(', ')}
                 </div>
               </div>
             </div>
@@ -982,7 +1360,7 @@ export const EvaluationView: React.FC = () => {
             <div style={{ background: '#20101b', padding: '14px', borderRadius: '8px', border: '1px solid var(--c-copper)', marginBottom: '22px' }}>
               <b style={{ color: 'var(--c-peach)', fontSize: '13px' }}>⚡ Confirmación de Registro Local</b>
               <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: '#fcebe6' }}>
-                Al pulsar el botón a continuación, se calcularán las puntuaciones objetivas reproducibles y se habilitarán los botones de exportación a JSON y CSV con el identificador de sesión.
+                Al pulsar el botón a continuación, se calcularán las puntuaciones objetivas reproducibles correspondientes a tu modalidad y se habilitarán las opciones de exportación a JSON y CSV.
               </p>
             </div>
 
@@ -1009,23 +1387,28 @@ export const EvaluationView: React.FC = () => {
         {session.currentStage === 'stage_complete' && (
           <div className="glass-panel" style={{ padding: '28px', textAlign: 'center' }}>
             <div style={{ fontSize: '44px', marginBottom: '8px' }}>🎉</div>
-            <h3 style={{ color: 'var(--c-peach)', margin: '0 0 8px 0' }}>¡Evaluación Científica Completada con Éxito!</h3>
+            <h3 style={{ color: 'var(--c-peach)', margin: '0 0 8px 0' }}>¡Evaluación Completada con Éxito!</h3>
             <p style={{ fontSize: '14px', color: '#fcebe6', maxWidth: '640px', margin: '0 auto 20px' }}>
-              Gracias por tu tiempo y rigor académico. Tus respuestas han sido procesadas localmente con el identificador anónimo <b>{session.sessionId}</b>.
+              Muchas gracias por tu tiempo y dedicación. Tus respuestas han sido procesadas localmente en <b>{isGuided ? 'Modo Guiado' : 'Modo de Investigación'}</b> con el código anónimo <b>{session.sessionId}</b>.
             </p>
 
             {/* Resumen de puntuaciones objetivas */}
             {session.objectiveScores && (
               <div style={{ background: '#190d16', padding: '18px', borderRadius: '8px', border: '1px solid #381827', maxWidth: '580px', margin: '0 auto 24px', textAlign: 'left' }}>
-                <h4 style={{ color: 'var(--c-peach)', margin: '0 0 12px 0', fontSize: '14px', borderBottom: '1px solid #331725', paddingBottom: '6px' }}>
-                  📊 Resumen de Puntuaciones Objetivas Obtenidas:
-                </h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid #331725', paddingBottom: '6px' }}>
+                  <h4 style={{ color: 'var(--c-peach)', margin: 0, fontSize: '14px' }}>
+                    📊 Resumen de Respuestas Objetivas:
+                  </h4>
+                  <span style={{ fontSize: '11px', background: '#291220', color: 'var(--c-rose)', padding: '2px 8px', borderRadius: '10px' }}>
+                    Modalidad: {session.objectiveScores.modeScored === 'guiado' ? '🌟 Guiado' : '🔬 Investigación'}
+                  </span>
+                </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#fff' }}>Comprensión Conceptual (K1):</span>
+                  <span style={{ color: '#fff' }}>K1: Comprender las ideas:</span>
                   <b style={{ color: 'var(--c-peach)' }}>{session.objectiveScores.k1Score} / {session.objectiveScores.k1Max} pts</b>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-                  <span style={{ color: '#fff' }}>Trazabilidad y Verificación (K2):</span>
+                  <span style={{ color: '#fff' }}>K2: Comprobar la información:</span>
                   <b style={{ color: 'var(--c-peach)' }}>{session.objectiveScores.k2Score} / {session.objectiveScores.k2Max} pts</b>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px', borderTop: '1px dashed #3d1b2a', paddingTop: '8px' }}>
@@ -1034,8 +1417,12 @@ export const EvaluationView: React.FC = () => {
                     {session.objectiveScores.totalObjectiveScore} / {session.objectiveScores.totalObjectiveMax} pts ({session.objectiveScores.percentage}%)
                   </b>
                 </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '12px', color: 'var(--c-rose)' }}>
+                  <span>Pistas / Ayudas utilizadas:</span>
+                  <b>{session.hintsUsed?.length || 0} pistas</b>
+                </div>
                 <p style={{ margin: '10px 0 0 0', fontSize: '11px', color: 'var(--c-rose)', fontStyle: 'italic' }}>
-                  * Las justificaciones de comparación (K3) y síntesis (K4) se conservan íntegras en los archivos exportados para su evaluación por pares con la rúbrica de 7 criterios.
+                  * Las comparaciones (K3) y conexiones (K4) se guardan íntegras en los archivos exportados para su valoración humana con la rúbrica de 7 criterios.
                 </p>
               </div>
             )}
@@ -1084,7 +1471,7 @@ export const EvaluationView: React.FC = () => {
             <div className="glass-panel" style={{ maxWidth: '480px', padding: '24px', border: '1px solid var(--c-crimson)', background: '#1c0c16' }}>
               <h3 style={{ color: '#ff707a', margin: '0 0 10px 0' }}>⚠️ ¿Eliminar datos locales de la evaluación?</h3>
               <p style={{ fontSize: '13px', lineHeight: 1.5, color: '#fcebe6', margin: '0 0 18px 0' }}>
-                Esta acción eliminará de forma irreversible las respuestas almacenadas localmente en este navegador para la sesión <b>{session.sessionId}</b>. Si deseas conservarlas, descárgalas en JSON o CSV antes de continuar.
+                Esta acción eliminará de forma irreversible las respuestas guardadas localmente en este navegador para la sesión <b>{session.sessionId}</b>. Si deseas conservarlas, descárgalas en JSON o CSV antes de continuar.
               </p>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
                 <button className="cyber-btn cyber-btn-outline" onClick={() => setConfirmDeleteModal(false)}>
