@@ -4,9 +4,12 @@ import { CombatVerdict, CombatRecord } from '../../../types/combat';
 import { useSession } from '../../../context/SessionContext';
 import { soundEngine } from '../../../services/soundEngine';
 import { getCardImageUrl, getCardBackImageUrl } from '../../../utils/imagePath';
+import { useGameTutorial } from '../../../hooks/useGameTutorial';
+import { GameTutorialModal } from '../../../components/tutorial/GameTutorialModal';
 
 export const CombatGame: React.FC = () => {
   const { deck, combats, addCombatRecord, inspectCard, setActiveTab } = useSession();
+  const { isOpen: isTutorialOpen, openTutorial, closeTutorial } = useGameTutorial('combat');
 
   const [cardAId, setCardAId] = useState<string>(() => {
     const defaultA = deck.find(c => c.id === 'MTC22') || deck[0];
@@ -95,6 +98,13 @@ export const CombatGame: React.FC = () => {
             </p>
           </div>
           <div className="game-actions">
+            <button
+              className="cyber-btn cyber-btn-outline tutorial-trigger-btn"
+              onClick={openTutorial}
+              title="Ver tutorial de Combates de Validación"
+            >
+              📖 ¿Cómo se juega?
+            </button>
             <button className="cyber-btn cyber-btn-secondary" onClick={handleRandomCombat}>
               Duelo Aleatorio 🎲
             </button>
@@ -319,6 +329,12 @@ export const CombatGame: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <GameTutorialModal
+        gameKey="combat"
+        isOpen={isTutorialOpen}
+        onClose={closeTutorial}
+      />
     </div>
   );
 };

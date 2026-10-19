@@ -3,9 +3,12 @@ import { Card } from '../../../types/card';
 import { useSession } from '../../../context/SessionContext';
 import { soundEngine } from '../../../services/soundEngine';
 import { getCardImageUrl, getCardBackImageUrl } from '../../../utils/imagePath';
+import { useGameTutorial } from '../../../hooks/useGameTutorial';
+import { GameTutorialModal } from '../../../components/tutorial/GameTutorialModal';
 
 export const TimelineGame: React.FC = () => {
   const { deck, topic, setTimelineCards, inspectCard, setActiveTab } = useSession();
+  const { isOpen: isTutorialOpen, openTutorial, closeTutorial } = useGameTutorial('timeline');
 
   const [poolCards, setPoolCards] = useState<Card[]>([]);
   const [slots, setSlots] = useState<(Card | null)[]>([]);
@@ -169,6 +172,13 @@ export const TimelineGame: React.FC = () => {
             </p>
           </div>
           <div className="game-actions">
+            <button
+              className="cyber-btn cyber-btn-outline tutorial-trigger-btn"
+              onClick={openTutorial}
+              title="Ver tutorial de El Puente de Cronología"
+            >
+              📖 ¿Cómo se juega?
+            </button>
             <button className="cyber-btn cyber-btn-primary" onClick={handleValidate}>
               Validar Puente ⚡
             </button>
@@ -345,6 +355,12 @@ export const TimelineGame: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <GameTutorialModal
+        gameKey="timeline"
+        isOpen={isTutorialOpen}
+        onClose={closeTutorial}
+      />
     </div>
   );
 };

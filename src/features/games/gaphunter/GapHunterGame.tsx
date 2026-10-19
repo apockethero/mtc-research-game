@@ -5,9 +5,12 @@ import { useSession } from '../../../context/SessionContext';
 import { soundEngine } from '../../../services/soundEngine';
 import { getCardImageUrl, getCardBackImageUrl } from '../../../utils/imagePath';
 import { BeamCanvas } from './BeamCanvas';
+import { useGameTutorial } from '../../../hooks/useGameTutorial';
+import { GameTutorialModal } from '../../../components/tutorial/GameTutorialModal';
 
 export const GapHunterGame: React.FC = () => {
   const { deck, topic, discoveredGaps, addDiscoveredGap, inspectCard, setActiveTab } = useSession();
+  const { isOpen: isTutorialOpen, openTutorial, closeTutorial } = useGameTutorial('gapHunter');
 
   const [selectedCards, setSelectedCards] = useState<Card[]>([]);
   const stageRef = useRef<HTMLDivElement | null>(null);
@@ -117,6 +120,13 @@ export const GapHunterGame: React.FC = () => {
             </p>
           </div>
           <div className="game-actions">
+            <button
+              className="cyber-btn cyber-btn-outline tutorial-trigger-btn"
+              onClick={openTutorial}
+              title="Ver tutorial de Cazadores de Vacíos"
+            >
+              📖 ¿Cómo se juega?
+            </button>
             <button
               className="cyber-btn cyber-btn-primary"
               disabled={selectedCards.length < 2}
@@ -239,6 +249,12 @@ export const GapHunterGame: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <GameTutorialModal
+        gameKey="gapHunter"
+        isOpen={isTutorialOpen}
+        onClose={closeTutorial}
+      />
     </div>
   );
 };

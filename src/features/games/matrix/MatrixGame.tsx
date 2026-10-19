@@ -4,6 +4,8 @@ import { ClassificationCriteria } from '../../../types/session';
 import { useSession } from '../../../context/SessionContext';
 import { soundEngine } from '../../../services/soundEngine';
 import { getCardImageUrl, getCardBackImageUrl } from '../../../utils/imagePath';
+import { useGameTutorial } from '../../../hooks/useGameTutorial';
+import { GameTutorialModal } from '../../../components/tutorial/GameTutorialModal';
 
 interface CategoryConfig {
   id: string;
@@ -14,6 +16,7 @@ interface CategoryConfig {
 
 export const MatrixGame: React.FC = () => {
   const { deck, criteria, setCriteria, matrixGroups, setMatrixGroups, inspectCard, setActiveTab } = useSession();
+  const { isOpen: isTutorialOpen, openTutorial, closeTutorial } = useGameTutorial('matrix');
 
   const [score, setScore] = useState<number>(0);
   const [activePool, setActivePool] = useState<Card[]>([]);
@@ -224,6 +227,13 @@ export const MatrixGame: React.FC = () => {
               Puntaje Epistemológico: <b>{score} pts</b>
             </div>
 
+            <button
+              className="cyber-btn cyber-btn-outline tutorial-trigger-btn"
+              onClick={openTutorial}
+              title="Ver tutorial de La Matriz de Enfoques"
+            >
+              📖 ¿Cómo se juega?
+            </button>
             <button className="cyber-btn cyber-btn-secondary" onClick={handleAutoClassifyAll} style={{ fontSize: '12px' }}>
               Clasificar Todo (Demostración)
             </button>
@@ -364,6 +374,12 @@ export const MatrixGame: React.FC = () => {
           )}
         </div>
       </div>
+
+      <GameTutorialModal
+        gameKey="matrix"
+        isOpen={isTutorialOpen}
+        onClose={closeTutorial}
+      />
     </div>
   );
 };
