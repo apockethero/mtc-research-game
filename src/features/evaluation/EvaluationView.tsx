@@ -82,17 +82,17 @@ export const EvaluationView: React.FC = () => {
     leftLabel = isGuided ? 'Nada de acuerdo (1)' : 'Totalmente en desacuerdo (1)',
     rightLabel = isGuided ? 'Muy de acuerdo (5)' : 'Totalmente de acuerdo (5)'
   ) => (
-    <div className="eval-likert-row" style={{ marginBottom: '14px', background: '#180d15', padding: '12px', borderRadius: '8px', border: '1px solid #331725' }}>
-      <div style={{ fontSize: '13px', fontWeight: 600, color: '#fcebe6', marginBottom: '8px' }}>{label}</div>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', flexWrap: 'wrap' }}>
-        <span style={{ fontSize: '11px', color: 'var(--c-rose)', minWidth: '130px' }}>{leftLabel}</span>
-        <div style={{ display: 'flex', gap: '8px' }}>
+    <div className="eval-likert-row">
+      <div className="eval-likert-label">{label}</div>
+      <div className="eval-likert-controls-bar">
+        <span className="eval-likert-anchor">{leftLabel}</span>
+        <div className="eval-likert-btn-group">
           {[1, 2, 3, 4, 5].map(num => (
             <button
               key={num}
               type="button"
               className={`cyber-btn ${value === num ? 'cyber-btn-primary' : 'cyber-btn-outline'}`}
-              style={{ minWidth: '36px', height: '36px', padding: 0, fontSize: '13px', fontWeight: 700 }}
+              style={{ minWidth: '38px', height: '38px', padding: 0, fontSize: '13px', fontWeight: 700 }}
               onClick={() => onChange(num)}
             >
               {num}
@@ -101,26 +101,28 @@ export const EvaluationView: React.FC = () => {
           <button
             type="button"
             className={`cyber-btn ${value === 0 ? 'cyber-btn-secondary' : 'cyber-btn-outline'}`}
-            style={{ fontSize: '11px', padding: '0 8px', height: '36px' }}
+            style={{ fontSize: '11px', padding: '0 10px', height: '38px' }}
             onClick={() => onChange(0)}
             title="No puedo valorar este aspecto o no sé"
           >
             No sé
           </button>
         </div>
-        <span style={{ fontSize: '11px', color: 'var(--c-rose)', minWidth: '130px', textAlign: 'right' }}>{rightLabel}</span>
+        <span className="eval-likert-anchor right">{rightLabel}</span>
       </div>
     </div>
   );
 
   return (
     <div className="view-panel active eval-view-panel">
-      <div className="game-wrapper" style={{ maxWidth: '960px', margin: '0 auto' }}>
-        {/* CABECERA DEL INSTRUMENTO */}
-        <div className="game-header-bar" style={{ marginBottom: '16px' }}>
-          <div>
-            <div className="game-tag" style={{ color: 'var(--c-peach)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <span>INSTRUMENTO DE VALIDACIÓN CIENTÍFICA · VERSIÓN 1.1.0</span>
+      <div className="game-wrapper" style={{ maxWidth: '1040px', margin: '0 auto' }}>
+        {/* CABECERA DEL INSTRUMENTO SEPARADA VISUALMENTE */}
+        <div className="eval-header-card">
+          <div className="eval-header-meta-bar">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: 'var(--c-peach)', letterSpacing: '0.5px' }}>
+                INSTRUMENTO DE VALIDACIÓN CIENTÍFICA · VERSIÓN 1.1.0
+              </span>
               <span
                 style={{
                   background: isGuided ? 'var(--c-copper)' : 'var(--c-plum)',
@@ -134,47 +136,47 @@ export const EvaluationView: React.FC = () => {
                 {isGuided ? '🌟 MODO GUIADO' : '🔬 MODO INVESTIGACIÓN'}
               </span>
             </div>
-            <h2 style={{ margin: '4px 0 6px', color: '#fff' }}>Evaluación Científica del Sistema MTC</h2>
-            <p style={{ margin: 0, fontSize: '13px', color: 'var(--c-rose)' }}>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div className="hud-stats-pill" style={{ background: '#20101b', border: '1px solid var(--border-color)', margin: 0 }}>
+                <span>ID Sesión:</span> <b>{session.sessionId}</b>
+              </div>
+              {session.currentStage !== 'stage_complete' && (
+                <button
+                  className="cyber-btn cyber-btn-outline"
+                  style={{ fontSize: '11px', padding: '4px 10px' }}
+                  onClick={() => setConfirmDeleteModal(true)}
+                  title="Reiniciar o borrar datos locales de esta evaluación"
+                >
+                  Reiniciar
+                </button>
+              )}
+            </div>
+          </div>
+
+          <div className="eval-header-title-box">
+            <h2>Evaluación Científica del Sistema MTC</h2>
+            <p>
               {isGuided
                 ? 'Actividad visual y sencilla para aprender a interpretar investigaciones sobre triciclos eléctricos ligeros.'
                 : 'Instrumento piloto para recolectar datos empíricos sobre la comprensión, trazabilidad y utilidad del sistema de tarjetas de revisión.'}
             </p>
           </div>
-          <div className="game-actions" style={{ alignItems: 'flex-end' }}>
-            <div className="hud-stats-pill" style={{ background: '#20101b', border: '1px solid var(--border-color)' }}>
-              <span>ID Sesión:</span> <b>{session.sessionId}</b>
-            </div>
-            {session.currentStage !== 'stage_complete' && (
-              <button
-                className="cyber-btn cyber-btn-outline"
-                style={{ fontSize: '11px', padding: '4px 8px' }}
-                onClick={() => setConfirmDeleteModal(true)}
-                title="Reiniciar o borrar datos locales de esta evaluación"
-              >
-                Reiniciar
-              </button>
-            )}
-          </div>
         </div>
 
-        {/* BARRA DE PROGRESO DE ETAPAS */}
+        {/* BARRA DE PROGRESO DE ETAPAS EN PANEL ELEVADO */}
         {session.currentStage !== 'stage_complete' && (
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px', fontSize: '12px', color: 'var(--c-rose)' }}>
-              <span>Etapa actual: <b>{stagesList[currentIdx]?.label}</b></span>
+          <div className="eval-progress-card">
+            <div className="eval-progress-meta">
+              <span>Etapa actual: <b style={{ color: '#fff' }}>{stagesList[currentIdx]?.label}</b></span>
               <span>
-                Progreso: <b>{progressPercent}%</b> · Tiempo estimado: <b>{isGuided ? '~8-10 min' : '~12-15 min'}</b>
+                Progreso: <b style={{ color: 'var(--c-peach)' }}>{progressPercent}%</b> · Tiempo estimado: <b>{isGuided ? '~8-10 min' : '~12-15 min'}</b>
               </span>
             </div>
-            <div style={{ height: '6px', background: '#25121e', borderRadius: '3px', overflow: 'hidden' }}>
+            <div className="eval-progress-bar-track">
               <div
-                style={{
-                  height: '100%',
-                  width: `${progressPercent}%`,
-                  background: 'linear-gradient(90deg, var(--c-crimson), var(--c-copper), var(--c-peach))',
-                  transition: 'width 0.3s ease'
-                }}
+                className="eval-progress-bar-fill"
+                style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
@@ -438,8 +440,8 @@ export const EvaluationView: React.FC = () => {
             </p>
 
             {/* B1: Aporte principal con soporte visual MTC09 */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
+            <div className="eval-question-card">
+              <div className="eval-question-prompt">
                 1. {isGuided ? K1_QUESTIONS.q1CoreContribution.promptGuided : K1_QUESTIONS.q1CoreContribution.promptResearch}
               </div>
 
@@ -455,9 +457,9 @@ export const EvaluationView: React.FC = () => {
                 maskAnswers={true}
               />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="eval-options-list">
                 {(isGuided ? K1_QUESTIONS.q1CoreContribution.optionsGuided : K1_QUESTIONS.q1CoreContribution.optionsResearch).map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
+                  <label key={opt.id} className="eval-option-row">
                     <input
                       type="radio"
                       name="q1Core"
@@ -471,20 +473,20 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* B2: Tipos de Evidencia */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '6px' }}>
+            <div className="eval-question-card">
+              <div className="eval-question-prompt">
                 2. {isGuided ? K1_QUESTIONS.q2EvidenceTypes.promptGuided : K1_QUESTIONS.q2EvidenceTypes.promptResearch}
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--c-rose)', margin: '0 0 12px 0' }}>
+              <p style={{ fontSize: '13px', color: 'var(--c-rose)', margin: '0 0 16px 0', lineHeight: 1.5 }}>
                 {isGuided
                   ? 'Cada investigación usó un método distinto: computadora (simulación), taller (prototipo) o mediciones en ruta (experimento).'
                   : 'Distingue simulación numérica, prototipado físico y pruebas experimentales en banco/ruta.'}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '12px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
                 {K1_QUESTIONS.q2EvidenceTypes.items.map((item) => (
-                  <div key={item.cardId} style={{ background: '#22111d', padding: '12px', borderRadius: '8px', border: '1px solid #3d1c2c' }}>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: 'var(--c-peach)', marginBottom: '6px' }}>
+                  <div key={item.cardId} style={{ background: '#22111d', padding: '14px', borderRadius: '8px', border: '1px solid #3d1c2c' }}>
+                    <div style={{ fontSize: '12.5px', fontWeight: 700, color: 'var(--c-peach)', marginBottom: '8px' }}>
                       {item.authorYear}
                     </div>
 
@@ -527,8 +529,8 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* B3: Limitación metodológica con soporte visual MTC06 */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
+            <div className="eval-question-card">
+              <div className="eval-question-prompt">
                 3. {isGuided ? K1_QUESTIONS.q3MethodologicalLimitation.promptGuided : K1_QUESTIONS.q3MethodologicalLimitation.promptResearch}
               </div>
 
@@ -543,9 +545,9 @@ export const EvaluationView: React.FC = () => {
                 maskAnswers={true}
               />
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="eval-options-list">
                 {(isGuided ? K1_QUESTIONS.q3MethodologicalLimitation.optionsGuided : K1_QUESTIONS.q3MethodologicalLimitation.optionsResearch).map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
+                  <label key={opt.id} className="eval-option-row">
                     <input
                       type="radio"
                       name="q3Limit"
@@ -559,32 +561,32 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* B4: Resultado vs Hipótesis */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
+            <div className="eval-question-card">
+              <div className="eval-question-prompt">
                 4. {isGuided ? K1_QUESTIONS.q4TechnicalResultVsHypothesis.promptGuided : K1_QUESTIONS.q4TechnicalResultVsHypothesis.promptResearch}
               </div>
 
               {K1_QUESTIONS.q4TechnicalResultVsHypothesis.hintText && (
-                <div style={{ marginBottom: '10px' }}>
+                <div style={{ marginBottom: '12px' }}>
                   <button
                     type="button"
                     className="cyber-btn cyber-btn-outline"
-                    style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--c-peach)' }}
+                    style={{ fontSize: '11px', padding: '4px 10px', color: 'var(--c-peach)' }}
                     onClick={() => recordHintUsed(K1_QUESTIONS.q4TechnicalResultVsHypothesis.hintId, 'k1_q4')}
                   >
                     💡 Pista: ¿Cómo distinguir un dato medido de una suposición?
                   </button>
                   {session.wasAssistedByQuestion?.['k1_q4'] && (
-                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#ffd2be', background: '#11070e', padding: '8px 12px', borderRadius: '6px' }}>
+                    <div className="eval-hint-box">
                       {K1_QUESTIONS.q4TechnicalResultVsHypothesis.hintText}
                     </div>
                   )}
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="eval-options-list">
                 {(isGuided ? K1_QUESTIONS.q4TechnicalResultVsHypothesis.optionsGuided : K1_QUESTIONS.q4TechnicalResultVsHypothesis.optionsResearch).map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
+                  <label key={opt.id} className="eval-option-row">
                     <input
                       type="radio"
                       name="q4Result"
@@ -597,7 +599,7 @@ export const EvaluationView: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
+            <div className="eval-stage-nav-bar">
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_a_profile')}>
                 ← Anterior
               </button>
@@ -641,8 +643,8 @@ export const EvaluationView: React.FC = () => {
             </p>
 
             {/* C1: Localizar metadatos MTC43 */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '8px' }}>
+            <div className="eval-question-card">
+              <div className="eval-question-prompt">
                 1. {isGuided ? K2_QUESTIONS.q1LocateMetadata.promptGuided : K2_QUESTIONS.q1LocateMetadata.promptResearch}
               </div>
 
@@ -659,9 +661,9 @@ export const EvaluationView: React.FC = () => {
                 wasHintUsed={Boolean(session.wasAssistedByQuestion?.['k2_q1'])}
               />
 
-              <div className="form-grid">
+              <div className="form-grid" style={{ marginTop: '14px', gap: '14px' }}>
                 <div>
-                  <label style={{ fontSize: '12px', color: 'var(--c-rose)' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--c-peach)', display: 'block', marginBottom: '6px' }}>
                     {isGuided ? 'Identificador digital (DOI):' : 'DOI de la fuente primaria:'}
                   </label>
                   <input
@@ -676,7 +678,9 @@ export const EvaluationView: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label style={{ fontSize: '12px', color: 'var(--c-rose)' }}>Año de Publicación:</label>
+                  <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--c-peach)', display: 'block', marginBottom: '6px' }}>
+                    Año de Publicación:
+                  </label>
                   <input
                     type="text"
                     className="cyber-input"
@@ -689,8 +693,10 @@ export const EvaluationView: React.FC = () => {
                   />
                 </div>
               </div>
-              <div style={{ marginTop: '10px' }}>
-                <label style={{ fontSize: '12px', color: 'var(--c-rose)' }}>Tipo de Documento:</label>
+              <div style={{ marginTop: '14px' }}>
+                <label style={{ fontSize: '12px', fontWeight: 700, color: 'var(--c-peach)', display: 'block', marginBottom: '6px' }}>
+                  Tipo de Documento:
+                </label>
                 <select
                   className="cyber-select full-width"
                   value={session.k2Responses.q1LocateMetadata?.docType || ''}
@@ -709,32 +715,32 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* C2: Indicadores ausentes o pendientes */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
+            <div className="eval-question-card">
+              <div className="eval-question-prompt">
                 2. {isGuided ? K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.promptGuided : K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.promptResearch}
               </div>
 
               {K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.hintText && (
-                <div style={{ marginBottom: '10px' }}>
+                <div style={{ marginBottom: '12px' }}>
                   <button
                     type="button"
                     className="cyber-btn cyber-btn-outline"
-                    style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--c-peach)' }}
+                    style={{ fontSize: '11px', padding: '4px 10px', color: 'var(--c-peach)' }}
                     onClick={() => recordHintUsed(K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.hintId, 'k2_q2')}
                   >
                     💡 Pista: ¿Qué pasa cuando falta un dato de calidad?
                   </button>
                   {session.wasAssistedByQuestion?.['k2_q2'] && (
-                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#ffd2be', background: '#11070e', padding: '8px 12px', borderRadius: '6px' }}>
+                    <div className="eval-hint-box">
                       {K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.hintText}
                     </div>
                   )}
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="eval-options-list">
                 {(isGuided ? K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.optionsGuided : K2_QUESTIONS.q2MissingOrPendingIndicatorInterpretation.optionsResearch).map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
+                  <label key={opt.id} className="eval-option-row">
                     <input
                       type="radio"
                       name="q2Pending"
@@ -748,32 +754,32 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* C3: Trazabilidad vs Citas secundarias */}
-            <div style={{ background: '#190d16', padding: '16px', borderRadius: '8px', marginBottom: '20px', border: '1px solid #381827' }}>
-              <div style={{ fontWeight: 700, fontSize: '13.5px', color: '#fff', marginBottom: '10px' }}>
+            <div className="eval-question-card">
+              <div className="eval-question-prompt">
                 3. {isGuided ? K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.promptGuided : K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.promptResearch}
               </div>
 
               {K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.hintText && (
-                <div style={{ marginBottom: '10px' }}>
+                <div style={{ marginBottom: '12px' }}>
                   <button
                     type="button"
                     className="cyber-btn cyber-btn-outline"
-                    style={{ fontSize: '11px', padding: '3px 8px', color: 'var(--c-peach)' }}
+                    style={{ fontSize: '11px', padding: '4px 10px', color: 'var(--c-peach)' }}
                     onClick={() => recordHintUsed(K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.hintId, 'k2_q3')}
                   >
                     💡 Pista: ¿Por qué ir directo a la fuente original?
                   </button>
                   {session.wasAssistedByQuestion?.['k2_q3'] && (
-                    <div style={{ marginTop: '6px', fontSize: '12px', color: '#ffd2be', background: '#11070e', padding: '8px 12px', borderRadius: '6px' }}>
+                    <div className="eval-hint-box">
                       {K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.hintText}
                     </div>
                   )}
                 </div>
               )}
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div className="eval-options-list">
                 {(isGuided ? K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.optionsGuided : K2_QUESTIONS.q3TraceabilityVsSecondaryCitation.optionsResearch).map((opt) => (
-                  <label key={opt.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontSize: '13px', color: '#fcebe6', background: '#22111d', padding: '8px 12px', borderRadius: '6px' }}>
+                  <label key={opt.id} className="eval-option-row">
                     <input
                       type="radio"
                       name="q3Audit"
@@ -786,7 +792,7 @@ export const EvaluationView: React.FC = () => {
               </div>
             </div>
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
+            <div className="eval-stage-nav-bar">
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_b_k1')}>
                 ← Anterior
               </button>
@@ -950,7 +956,7 @@ export const EvaluationView: React.FC = () => {
               'Muy seguro/a (5)'
             )}
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
+            <div className="eval-stage-nav-bar">
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_c_k2')}>
                 ← Anterior
               </button>
@@ -1103,24 +1109,24 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             {/* Rúbrica de evaluación de 7 criterios */}
-            <div style={{ background: '#190d16', padding: '14px', borderRadius: '8px', border: '1px solid #381827', marginBottom: '18px' }}>
-              <h4 style={{ color: 'var(--c-peach)', margin: '0 0 6px 0', fontSize: '13px' }}>
+            <div className="eval-question-card" style={{ background: '#170c14', border: '1px solid #4a2233', marginBottom: '24px' }}>
+              <h4 style={{ color: 'var(--c-peach)', margin: '0 0 6px 0', fontSize: '13.5px', fontWeight: 800 }}>
                 📋 Rúbrica de 7 Criterios para Revisión por Pares
               </h4>
-              <p style={{ fontSize: '11.5px', color: 'var(--c-rose)', margin: '0 0 10px 0' }}>
+              <p style={{ fontSize: '12px', color: 'var(--c-rose)', margin: '0 0 14px 0', lineHeight: 1.5 }}>
                 Tus respuestas abiertas se conservan íntegras para que un evaluador humano las valore de forma transparente con esta pauta:
               </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '8px', fontSize: '11px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px', fontSize: '11.5px' }}>
                 {K4_EVALUATION_RUBRIC.map(crit => (
-                  <div key={crit.criterionId} style={{ background: '#22111d', padding: '8px', borderRadius: '4px' }}>
-                    <b style={{ color: '#fff' }}>{crit.name}</b>
-                    <p style={{ margin: '2px 0 0 0', color: '#fcebe6', opacity: 0.85 }}>{crit.description}</p>
+                  <div key={crit.criterionId} style={{ background: '#22111d', padding: '10px 12px', borderRadius: '6px', border: '1px solid #381827' }}>
+                    <b style={{ color: '#fff', display: 'block', marginBottom: '4px' }}>{crit.name}</b>
+                    <p style={{ margin: 0, color: '#fcebe6', opacity: 0.9, lineHeight: 1.4 }}>{crit.description}</p>
                   </div>
                 ))}
               </div>
             </div>
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
+            <div className="eval-stage-nav-bar">
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_d_k3')}>
                 ← Anterior
               </button>
@@ -1229,7 +1235,7 @@ export const EvaluationView: React.FC = () => {
               isGuided ? 'Sí, me encantaría (5)' : 'Definitivamente sí (5)'
             )}
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
+            <div className="eval-stage-nav-bar">
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_e_k4')}>
                 ← Anterior
               </button>
@@ -1292,7 +1298,7 @@ export const EvaluationView: React.FC = () => {
               />
             </div>
 
-            <div style={{ marginTop: '24px', display: 'flex', justifyContent: 'space-between' }}>
+            <div className="eval-stage-nav-bar">
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_f_k5_k6')}>
                 ← Anterior
               </button>
@@ -1364,7 +1370,7 @@ export const EvaluationView: React.FC = () => {
               </p>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <div className="eval-stage-nav-bar">
               <button className="cyber-btn cyber-btn-outline" onClick={() => handlePrevStage('stage_g_comments')}>
                 ← Modificar Respuestas
               </button>

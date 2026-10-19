@@ -45,7 +45,7 @@ export const App: React.FC = () => {
       <NavigationTabs />
 
       {/* Main View Area */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main className="main-view-area" style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         {renderActiveView()}
       </main>
 
