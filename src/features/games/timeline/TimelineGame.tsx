@@ -356,6 +356,27 @@ export const TimelineGame: React.FC = () => {
         </div>
       </div>
 
+      {/* Barra de continuidad de la ruta metodológica */}
+      <div className="activity-continuity-bar">
+        <div className="continuity-info">
+          <span className="continuity-step-tag">Etapa 02 de 07 · Secuencia Temporal</span>
+          <span className="continuity-desc">
+            ¿Has explorado la evolución cronológica de los antecedentes? Continúa hacia la clasificación teórica y epistemológica de las metodologías.
+          </span>
+        </div>
+        <button
+          type="button"
+          className="cyber-btn cyber-btn-primary continuity-next-btn"
+          onClick={() => {
+            soundEngine.playSuccess();
+            setActiveTab('matrix');
+          }}
+        >
+          <span>Siguiente paso: La Matriz de Enfoques</span>
+          <span className="continuity-arrow">→</span>
+        </button>
+      </div>
+
       <GameTutorialModal
         gameKey="timeline"
         isOpen={isTutorialOpen}

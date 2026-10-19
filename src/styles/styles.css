@@ -345,12 +345,94 @@ body {
   flex-wrap: wrap;
 }
 
-/* TAB NAVIGATION */
+/* TAB NAVIGATION & SEQUENTIAL ROUTE */
 .main-nav-tabs-bar {
   background: #170d14;
   border-bottom: 1px solid var(--border-color);
   width: 100%;
   position: relative;
+}
+
+.nav-route-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.nav-route-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--c-burgundy) 0%, var(--c-copper) 50%, var(--c-peach) 100%);
+  transition: width 0.35s ease;
+  box-shadow: 0 0 6px rgba(253, 153, 92, 0.5);
+}
+
+.nav-route-banner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 6px 20px 2px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 11px;
+}
+
+.nav-route-legend {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.route-legend-title {
+  color: var(--c-peach);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 10px;
+}
+
+.route-legend-sep {
+  color: rgba(210, 152, 132, 0.4);
+}
+
+.route-legend-step {
+  color: #fcf6f4;
+}
+
+.route-legend-purpose {
+  color: var(--c-rose);
+  font-size: 10.5px;
+  opacity: 0.85;
+}
+
+.nav-route-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.route-start-badge {
+  background: rgba(253, 153, 92, 0.15);
+  border: 1px solid rgba(253, 153, 92, 0.4);
+  color: var(--c-peach);
+  padding: 1px 7px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.route-progress-counter {
+  color: var(--c-rose);
+  font-size: 10.5px;
+  white-space: nowrap;
 }
 
 .main-nav-tabs {
@@ -392,12 +474,12 @@ body {
   font-family: inherit;
   font-size: 13px;
   font-weight: 600;
-  padding: 13px 18px;
+  padding: 8px 14px;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   white-space: nowrap;
   border-bottom: 3px solid transparent;
   border-radius: 6px 6px 0 0;
@@ -423,6 +505,63 @@ body {
   box-shadow: inset 0 -1px 0 var(--c-peach);
 }
 
+.nav-step-num {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--c-rose);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  flex-shrink: 0;
+  line-height: 1.1;
+  transition: all 0.2s ease;
+}
+
+.nav-tab.active .nav-step-num {
+  background: var(--c-peach);
+  color: #140c11;
+  border-color: var(--c-peach);
+  font-weight: 900;
+}
+
+.nav-tab.is-completed .nav-step-num {
+  background: rgba(78, 175, 124, 0.2);
+  color: #5ce69f;
+  border-color: rgba(92, 230, 159, 0.35);
+}
+
+.nav-tab-text-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  line-height: 1.18;
+}
+
+.nav-tab-label {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.nav-tab.active .nav-tab-label {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.nav-tab-subtitle {
+  font-size: 9.5px;
+  font-weight: 500;
+  color: rgba(210, 152, 132, 0.7);
+  letter-spacing: 0.2px;
+}
+
+.nav-tab.active .nav-tab-subtitle {
+  color: var(--c-peach);
+  opacity: 0.95;
+}
+
 .nav-tab-badge {
   background: rgba(210, 152, 132, 0.25);
   color: var(--c-rose);
@@ -437,6 +576,101 @@ body {
 .nav-tab.active .nav-tab-badge {
   background: var(--c-peach);
   color: #140c11;
+}
+
+.nav-step-status {
+  font-size: 9.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 1px 5px;
+  font-weight: 800;
+  line-height: 1;
+  margin-left: 2px;
+}
+
+.nav-step-status.completed {
+  background: rgba(78, 175, 124, 0.2);
+  color: #5ce69f;
+  border: 1px solid rgba(92, 230, 159, 0.4);
+}
+
+.nav-step-status.start-hint {
+  background: rgba(253, 153, 92, 0.2);
+  color: var(--c-peach);
+  border: 1px solid var(--c-peach);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.nav-tab.initial-target {
+  box-shadow: inset 0 0 0 1px rgba(253, 153, 92, 0.35);
+}
+
+/* ACTIVITY CONTINUITY BAR */
+.activity-continuity-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 36px;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(37, 18, 29, 0.9) 0%, rgba(20, 10, 17, 0.95) 100%);
+  border: 1px solid var(--border-highlight);
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.continuity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 650px;
+}
+
+.continuity-step-tag {
+  display: inline-block;
+  align-self: flex-start;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--c-peach);
+  background: rgba(253, 153, 92, 0.12);
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 1px solid rgba(253, 153, 92, 0.25);
+}
+
+.continuity-desc {
+  font-size: 13px;
+  color: var(--c-rose);
+  line-height: 1.4;
+}
+
+.continuity-next-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.continuity-arrow {
+  font-size: 16px;
+  transition: transform 0.2s ease;
+}
+
+.continuity-next-btn:hover .continuity-arrow {
+  transform: translateX(4px);
 }
 
 /* VIEW PANELS & CONTENT LAYOUT */
@@ -2617,6 +2851,17 @@ body {
     justify-content: center;
     width: 100%;
   }
+  .activity-continuity-bar {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    padding: 16px;
+    gap: 14px;
+  }
+  .continuity-next-btn {
+    justify-content: center;
+    width: 100%;
+  }
   .eval-likert-controls-bar {
     flex-direction: column;
     align-items: stretch;
@@ -2652,10 +2897,20 @@ body {
     font-size: 12px;
     padding: 8px 10px;
   }
+  .nav-route-banner {
+    padding: 4px 12px 2px;
+    font-size: 10px;
+  }
+  .route-legend-purpose {
+    display: none;
+  }
   .nav-tab {
-    padding: 11px 13px;
+    padding: 8px 10px;
     font-size: 12px;
-    gap: 6px;
+    gap: 5px;
+  }
+  .nav-tab-subtitle {
+    display: none;
   }
   .view-panel {
     padding: 14px 10px;

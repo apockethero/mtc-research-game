@@ -1457,6 +1457,24 @@ export const EvaluationView: React.FC = () => {
               </button>
             </div>
 
+            {/* Barra de continuidad hacia la última etapa */}
+            <div className="activity-continuity-bar" style={{ marginTop: '24px', marginBottom: '24px' }}>
+              <div className="continuity-info">
+                <span className="continuity-step-tag">Etapa 06 de 07 · Validación Empírica</span>
+                <span className="continuity-desc">
+                  Has completado el instrumento científico. El paso final del recorrido es revisar y exportar tu borrador académico y matriz consolidada.
+                </span>
+              </div>
+              <button
+                type="button"
+                className="cyber-btn cyber-btn-primary continuity-next-btn"
+                onClick={() => setActiveTab('synthesis')}
+              >
+                <span>Siguiente paso: Estado del Arte Vivo</span>
+                <span className="continuity-arrow">→</span>
+              </button>
+            </div>
+
             <div style={{ borderTop: '1px solid #2d1421', paddingTop: '16px' }}>
               <button
                 className="cyber-btn cyber-btn-outline"

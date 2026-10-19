@@ -375,6 +375,27 @@ export const MatrixGame: React.FC = () => {
         </div>
       </div>
 
+      {/* Barra de continuidad de la ruta metodológica */}
+      <div className="activity-continuity-bar">
+        <div className="continuity-info">
+          <span className="continuity-step-tag">Etapa 03 de 07 · Clasificación Teórica</span>
+          <span className="continuity-desc">
+            Has clasificado la literatura en cuadrantes conceptuales. El siguiente paso es buscar intersecciones y vacíos no resueltos entre enfoques.
+          </span>
+        </div>
+        <button
+          type="button"
+          className="cyber-btn cyber-btn-primary continuity-next-btn"
+          onClick={() => {
+            soundEngine.playSuccess();
+            setActiveTab('gaphunter');
+          }}
+        >
+          <span>Siguiente paso: Cazadores de Vacíos</span>
+          <span className="continuity-arrow">→</span>
+        </button>
+      </div>
+
       <GameTutorialModal
         gameKey="matrix"
         isOpen={isTutorialOpen}

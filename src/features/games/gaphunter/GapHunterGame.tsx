@@ -250,6 +250,27 @@ export const GapHunterGame: React.FC = () => {
         </div>
       </div>
 
+      {/* Barra de continuidad de la ruta metodológica */}
+      <div className="activity-continuity-bar">
+        <div className="continuity-info">
+          <span className="continuity-step-tag">Etapa 04 de 07 · Detección de Brechas</span>
+          <span className="continuity-desc">
+            Has identificado vacíos de investigación conectando estudios complementarios. El siguiente paso es contrastar directamente dos estudios en un ring de combate crítico.
+          </span>
+        </div>
+        <button
+          type="button"
+          className="cyber-btn cyber-btn-primary continuity-next-btn"
+          onClick={() => {
+            soundEngine.playSuccess();
+            setActiveTab('combat');
+          }}
+        >
+          <span>Siguiente paso: Combates de Validación</span>
+          <span className="continuity-arrow">→</span>
+        </button>
+      </div>
+
       <GameTutorialModal
         gameKey="gapHunter"
         isOpen={isTutorialOpen}

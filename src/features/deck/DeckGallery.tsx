@@ -1,9 +1,10 @@
 import React, { useState, useMemo } from 'react';
 import { useSession } from '../../context/SessionContext';
 import { Card3D } from '../../components/cards/Card3D';
+import { soundEngine } from '../../services/soundEngine';
 
 export const DeckGallery: React.FC = () => {
-  const { deck, topic } = useSession();
+  const { deck, topic, setActiveTab } = useSession();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -171,6 +172,27 @@ export const DeckGallery: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Barra de continuidad de la ruta metodológica */}
+      <div className="activity-continuity-bar">
+        <div className="continuity-info">
+          <span className="continuity-step-tag">Etapa 01 de 07 · Catálogo Exploratorio</span>
+          <span className="continuity-desc">
+            Has explorado el catálogo completo de 49 antecedentes. El siguiente paso en la ruta metodológica es ordenar temporalmente los estudios para construir la línea base histórica.
+          </span>
+        </div>
+        <button
+          type="button"
+          className="cyber-btn cyber-btn-primary continuity-next-btn"
+          onClick={() => {
+            soundEngine.playSuccess();
+            setActiveTab('timeline');
+          }}
+        >
+          <span>Siguiente paso: El Puente de Cronología</span>
+          <span className="continuity-arrow">→</span>
+        </button>
+      </div>
     </div>
   );
 };

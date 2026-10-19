@@ -330,6 +330,27 @@ export const CombatGame: React.FC = () => {
         </div>
       </div>
 
+      {/* Barra de continuidad de la ruta metodológica */}
+      <div className="activity-continuity-bar">
+        <div className="continuity-info">
+          <span className="continuity-step-tag">Etapa 05 de 07 · Contraste Cruzado</span>
+          <span className="continuity-desc">
+            Has validado comparaciones directas entre antecedentes. El siguiente paso es responder el instrumento de evaluación científica para registrar tus observaciones exploratorias.
+          </span>
+        </div>
+        <button
+          type="button"
+          className="cyber-btn cyber-btn-primary continuity-next-btn"
+          onClick={() => {
+            soundEngine.playSuccess();
+            setActiveTab('evaluation');
+          }}
+        >
+          <span>Siguiente paso: Evaluación científica</span>
+          <span className="continuity-arrow">→</span>
+        </button>
+      </div>
+
       <GameTutorialModal
         gameKey="combat"
         isOpen={isTutorialOpen}
