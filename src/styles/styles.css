@@ -327,6 +327,37 @@ body {
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
+.hud-stats-primary-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.hud-stats-secondary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.hud-stats-toggle-btn {
+  display: none;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  color: var(--c-rose);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.hud-stats-toggle-btn:hover {
+  background: rgba(253, 153, 92, 0.18);
+  color: #fff;
+  border-color: var(--c-peach);
+}
+
 .hud-stats-pill .stat-item {
   display: inline-flex;
   align-items: center;
@@ -336,6 +367,10 @@ body {
 .hud-stats-pill b {
   color: var(--c-peach);
   font-weight: 800;
+}
+
+.hud-mobile-tools-trigger {
+  display: none;
 }
 
 .hud-controls-group {
@@ -371,68 +406,46 @@ body {
   box-shadow: 0 0 6px rgba(253, 153, 92, 0.5);
 }
 
-.nav-route-banner {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 6px 20px 2px;
-  display: flex;
+/* Barra compacta para móviles */
+.nav-mobile-bar {
+  display: none;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  font-size: 11px;
+  padding: 6px 14px;
+  background: #170d14;
 }
 
-.nav-route-legend {
+.nav-mobile-current {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.route-legend-title {
-  color: var(--c-peach);
+  gap: 7px;
+  font-size: 12px;
+  color: #fff;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  font-size: 10px;
 }
 
-.route-legend-sep {
-  color: rgba(210, 152, 132, 0.4);
+.nav-mobile-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
 }
 
-.route-legend-step {
-  color: #fcf6f4;
-}
-
-.route-legend-purpose {
-  color: var(--c-rose);
-  font-size: 10.5px;
-  opacity: 0.85;
-}
-
-.nav-route-summary {
+.nav-mobile-actions {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
 }
 
-.route-start-badge {
-  background: rgba(253, 153, 92, 0.15);
-  border: 1px solid rgba(253, 153, 92, 0.4);
-  color: var(--c-peach);
-  padding: 1px 7px;
-  border-radius: 4px;
-  font-size: 10px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.route-progress-counter {
+.nav-mobile-counter {
+  font-size: 11px;
   color: var(--c-rose);
-  font-size: 10.5px;
-  white-space: nowrap;
+  font-weight: 700;
+}
+
+.nav-mobile-toggle-btn {
+  font-size: 11px;
+  padding: 4px 10px;
 }
 
 .main-nav-tabs {
@@ -2878,45 +2891,131 @@ body {
 
 @media (max-width: 600px) {
   .top-hud {
-    padding: 8px 12px;
-  }
-  .hud-topic-title {
-    font-size: 16px;
-  }
-  .hud-question {
-    font-size: 12px;
-    max-width: 100%;
-  }
-  .hud-stats-pill {
-    gap: 8px;
-    font-size: 11px;
     padding: 6px 10px;
   }
-  .hud-controls-group button {
-    flex: 1 1 calc(50% - 6px);
-    font-size: 12px;
-    padding: 8px 10px;
+  .hud-title-row {
+    margin-bottom: 4px;
+    gap: 2px;
   }
-  .nav-route-banner {
-    padding: 4px 12px 2px;
-    font-size: 10px;
+  .brand-badge {
+    font-size: 9px;
+    padding: 1px 6px;
   }
-  .route-legend-purpose {
+  .hud-topic-title {
+    font-size: 15px;
+    margin: 2px 0;
+    line-height: 1.25;
+  }
+  .hud-question {
+    font-size: 11.5px;
+    margin-top: 2px;
+    line-height: 1.35;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hud-sub-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding-top: 6px;
+  }
+  .hud-stats-pill {
+    flex-direction: column;
+    align-items: stretch;
+    border-radius: 8px;
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  .hud-stats-primary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    font-size: 11.5px;
+  }
+  .hud-stats-toggle-btn {
+    display: inline-flex;
+  }
+  .hud-stats-secondary {
     display: none;
+    width: 100%;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 12px;
+    padding-top: 6px;
+    border-top: 1px dashed rgba(255, 255, 255, 0.12);
+  }
+  .hud-stats-secondary.is-expanded {
+    display: grid;
+  }
+  .hud-mobile-tools-trigger {
+    display: flex;
+    width: 100%;
+  }
+  .hud-tools-toggle-btn {
+    width: 100%;
+    justify-content: center;
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+  .hud-controls-group {
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+    background: #190c15;
+    border: 1px solid var(--border-highlight);
+    border-radius: 8px;
+    padding: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+  .hud-controls-group.tools-panel-open {
+    display: flex;
+  }
+  .hud-controls-group button {
+    width: 100%;
+    font-size: 12px;
+    padding: 7px 10px;
+    justify-content: center;
+  }
+  /* Mobile Navigation Bar */
+  .nav-mobile-bar {
+    display: flex;
+  }
+  .main-nav-tabs {
+    display: none;
+    padding: 4px 8px;
+    background: #12090e;
+    border-top: 1px solid var(--border-color);
+  }
+  .main-nav-tabs.mobile-expanded {
+    display: flex;
   }
   .nav-tab {
-    padding: 8px 10px;
-    font-size: 12px;
+    padding: 6px 10px;
+    font-size: 11.5px;
     gap: 5px;
   }
   .nav-tab-subtitle {
     display: none;
   }
   .view-panel {
-    padding: 14px 10px;
+    padding: 10px 8px;
+  }
+  .game-header-bar {
+    margin-bottom: 8px;
+    gap: 4px;
   }
   .game-header-bar h2 {
-    font-size: 20px;
+    font-size: 17px;
+    margin-bottom: 2px;
+  }
+  .game-header-bar p {
+    font-size: 11.5px;
+    margin-bottom: 4px;
   }
   .eval-stage-nav-bar button {
     width: 100%;
@@ -2924,17 +3023,20 @@ body {
 }
 
 @media (max-width: 390px) {
+  .hud-topic-title {
+    font-size: 14px;
+  }
+  .hud-stats-primary-row {
+    font-size: 11px;
+  }
+  .hud-stats-secondary {
+    grid-template-columns: 1fr;
+  }
+  .nav-mobile-title {
+    max-width: 140px;
+  }
   .hud-controls-group button {
-    flex: 1 1 100%;
-  }
-  .hud-stats-pill {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    text-align: center;
-    border-radius: 12px;
-  }
-  .hud-stats-pill .stat-item {
-    justify-content: center;
+    font-size: 11.5px;
   }
 }
 

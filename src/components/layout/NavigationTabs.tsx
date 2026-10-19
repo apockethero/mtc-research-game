@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useSession, NavTab } from '../../context/SessionContext';
 
 interface TabItem {
@@ -13,6 +13,7 @@ interface TabItem {
 
 export const NavigationTabs: React.FC = () => {
   const { activeTab, setActiveTab, stats, deck } = useSession();
+  const [isMobileRouteExpanded, setMobileRouteExpanded] = useState<boolean>(false);
 
   // Comprobar completitud de la evaluación científica desde localStorage de forma segura
   const isEvaluationComplete = useMemo(() => {
@@ -124,30 +125,38 @@ export const NavigationTabs: React.FC = () => {
         />
       </div>
 
-      {/* Indicador contextual de etapa */}
-      <div className="nav-route-banner">
-        <div className="nav-route-legend">
-          <span className="route-legend-title">Ruta Metodológica MTC</span>
-          <span className="route-legend-sep">·</span>
-          <span className="route-legend-step">
-            Etapa {currentTab.stepNumber} de {tabs.length.toString().padStart(2, '0')}: <strong>{currentTab.label}</strong>
-          </span>
-          <span className="route-legend-purpose">({currentTab.subtitle})</span>
+      {/* Barra móvil compacta: presenta la etapa actual y botón para desplegar la ruta completa */}
+      <div className="nav-mobile-bar">
+        <div className="nav-mobile-current">
+          <span className="nav-step-num">{currentTab.stepNumber}</span>
+          <span className="nav-tab-icon">{currentTab.icon}</span>
+          <span className="nav-mobile-title">{currentTab.label}</span>
+          {currentTab.isComplete ? (
+            <span className="nav-step-status completed" title="Etapa completada">✓</span>
+          ) : isInitialState && currentTab.id === 'deck' ? (
+            <span className="nav-step-status start-hint" title="Punto de partida recomendado">Inicio</span>
+          ) : null}
         </div>
-        <div className="nav-route-summary">
-          {isInitialState && (
-            <span className="route-start-badge" title="Punto de partida sugerido: explora primero el mazo de antecedentes">
-              Punto de partida: 01 Mazo Completo
-            </span>
-          )}
-          <span className="route-progress-counter">
-            <b>{completedCount}</b>/{tabs.length} completadas
-          </span>
+        <div className="nav-mobile-actions">
+          <span className="nav-mobile-counter">{completedCount}/7 ✓</span>
+          <button
+            type="button"
+            className="cyber-btn cyber-btn-outline nav-mobile-toggle-btn"
+            onClick={() => setMobileRouteExpanded(prev => !prev)}
+            aria-expanded={isMobileRouteExpanded}
+            aria-label={isMobileRouteExpanded ? 'Ocultar lista de etapas' : 'Desplegar ruta completa de 7 etapas'}
+          >
+            {isMobileRouteExpanded ? 'Ruta ▲' : 'Ruta (1-7) ▼'}
+          </button>
         </div>
       </div>
 
-      {/* Pestañas de navegación de la ruta */}
-      <nav className="main-nav-tabs" role="tablist" aria-label="Ruta secuencial de minijuegos y vistas de investigación">
+      {/* Pestañas de navegación de la ruta (visibles siempre en escritorio, desplegables en móvil) */}
+      <nav
+        className={`main-nav-tabs ${isMobileRouteExpanded ? 'mobile-expanded' : ''}`}
+        role="tablist"
+        aria-label="Ruta secuencial de minijuegos y vistas de investigación"
+      >
         {tabs.map((tab) => {
           const isActive = activeTab === tab.id;
           const isInitialTarget = isInitialState && tab.id === 'deck';
@@ -157,7 +166,11 @@ export const NavigationTabs: React.FC = () => {
               role="tab"
               aria-selected={isActive}
               className={`nav-tab ${isActive ? 'active' : ''} ${tab.isComplete ? 'is-completed' : ''} ${isInitialTarget ? 'initial-target' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                // Si está en móvil y se cambia de pestaña, cerramos el acordeón para mostrar el juego
+                setMobileRouteExpanded(false);
+              }}
               title={`${tab.stepNumber} · ${tab.label}: ${tab.subtitle}${tab.isComplete ? ' (Completada ✓)' : ''}`}
             >
               <span className="nav-step-num">{tab.stepNumber}</span>

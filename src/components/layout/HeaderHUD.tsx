@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSession } from '../../context/SessionContext';
 
 export const HeaderHUD: React.FC = () => {
@@ -11,6 +11,9 @@ export const HeaderHUD: React.FC = () => {
     resetSession,
     setActiveTab
   } = useSession();
+
+  const [showAllStats, setShowAllStats] = useState<boolean>(false);
+  const [isToolsOpen, setIsToolsOpen] = useState<boolean>(false);
 
   return (
     <header className="top-hud">
@@ -28,15 +31,49 @@ export const HeaderHUD: React.FC = () => {
 
         {/* SEGUNDA FILA: Panel compacto de estadísticas y controles de configuración agrupados */}
         <div className="hud-sub-row">
+          {/* Píldora de estadísticas: principal visible en móvil, secundarias desplegables; todas visibles en escritorio */}
           <div className="hud-stats-pill" aria-label="Estadísticas del juego">
-            <span className="stat-item">📊 Tesis: <b>{stats.totalUniqueCards}</b></span>
-            <span className="stat-item">⏳ Línea: <b>{stats.timelineCount}</b></span>
-            <span className="stat-item">🗂️ Matriz: <b>{stats.classifiedCount}</b></span>
-            <span className="stat-item">⚡ Vacíos: <b>{stats.gapsCount}</b></span>
-            <span className="stat-item">⚔️ Combates: <b>{stats.combatsCount}</b></span>
+            <div className="hud-stats-primary-row">
+              <span className="stat-item primary-stat">📊 Tesis: <b>{stats.totalUniqueCards}</b></span>
+              <button
+                type="button"
+                className="hud-stats-toggle-btn"
+                onClick={() => setShowAllStats(prev => !prev)}
+                aria-expanded={showAllStats}
+                aria-label={showAllStats ? 'Ocultar estadísticas secundarias' : 'Mostrar todas las estadísticas'}
+              >
+                {showAllStats ? 'Menos ▲' : '+ Estadísticas ▼'}
+              </button>
+            </div>
+
+            <div className={`hud-stats-secondary ${showAllStats ? 'is-expanded' : ''}`}>
+              <span className="stat-item">⏳ Línea: <b>{stats.timelineCount}</b></span>
+              <span className="stat-item">🗂️ Matriz: <b>{stats.classifiedCount}</b></span>
+              <span className="stat-item">⚡ Vacíos: <b>{stats.gapsCount}</b></span>
+              <span className="stat-item">⚔️ Combates: <b>{stats.combatsCount}</b></span>
+            </div>
           </div>
 
-          <div className="hud-controls-group">
+          {/* Botón disparador del panel «Herramientas» en dispositivos móviles */}
+          <div className="hud-mobile-tools-trigger">
+            <button
+              type="button"
+              className={`cyber-btn ${isToolsOpen ? 'cyber-btn-primary' : 'cyber-btn-secondary'} hud-tools-toggle-btn`}
+              onClick={() => setIsToolsOpen(prev => !prev)}
+              aria-expanded={isToolsOpen}
+              aria-controls="hud-tools-panel"
+            >
+              🛠️ Herramientas {isToolsOpen ? '▲' : '▼'}
+            </button>
+          </div>
+
+          {/* Panel de Controles: desplegable en móvil, en línea en escritorio */}
+          <div
+            id="hud-tools-panel"
+            className={`hud-controls-group ${isToolsOpen ? 'tools-panel-open' : ''}`}
+            role="region"
+            aria-label="Panel de herramientas y controles"
+          >
             <button
               className="cyber-btn cyber-btn-secondary"
               onClick={() => setWizardOpen(true)}

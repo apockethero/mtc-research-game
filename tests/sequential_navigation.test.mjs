@@ -34,25 +34,28 @@ test('1. Secuencia y numeración de etapas en NavigationTabs (01 a 07)', () => {
   assert.ok(content.includes('Síntesis y exportación'), 'Debe incluir subtítulo para etapa 07');
 });
 
-test('2. Detección de inicio sin avances y orientación hacia etapa 01', () => {
+test('2. Detección de inicio sin avances y orientación compacta hacia etapa 01', () => {
   const navTabsPath = path.join(projectRoot, 'src/components/layout/NavigationTabs.tsx');
   const content = fs.readFileSync(navTabsPath, 'utf-8');
 
   // Verificar lógica de detección de estado inicial
   assert.ok(content.includes('isInitialState'), 'Debe computar isInitialState');
-  assert.ok(content.includes('route-start-badge'), 'Debe renderizar badge de punto de partida');
   assert.ok(content.includes('start-hint'), 'Debe incluir clase start-hint para el paso inicial');
-  assert.ok(content.includes('Punto de partida: 01 Mazo Completo'), 'Debe indicar que el inicio es el mazo de antecedentes');
+  assert.ok(content.includes('initial-target'), 'Debe incluir clase initial-target para el paso inicial');
 });
 
-test('3. Barra de progreso discreta y banner contextual de ruta', () => {
+test('3. Simplificación visual: eliminación de banners redundantes y conservación de barra de progreso sutil', () => {
   const navTabsPath = path.join(projectRoot, 'src/components/layout/NavigationTabs.tsx');
   const content = fs.readFileSync(navTabsPath, 'utf-8');
 
-  assert.ok(content.includes('nav-route-progress-bar'), 'Debe incluir barra de progreso');
+  // No debe incluir los bloques de texto redundantes eliminados
+  assert.ok(!content.includes('nav-route-banner'), 'nav-route-banner debe haber sido eliminado');
+  assert.ok(!content.includes('Ruta Metodológica MTC · Etapa'), 'El banner de texto redundante debe eliminarse');
+  assert.ok(!content.includes('Punto de partida: 01 Mazo Completo · 0/7 completadas'), 'El contador de texto redundante debe eliminarse');
+
+  // Debe conservar la barra de progreso discreta
+  assert.ok(content.includes('nav-route-progress-bar'), 'Debe incluir barra de progreso sutil');
   assert.ok(content.includes('nav-route-progress-fill'), 'Debe incluir relleno proporcional de progreso');
-  assert.ok(content.includes('nav-route-banner'), 'Debe incluir banner informativo de ruta');
-  assert.ok(content.includes('Ruta Metodológica MTC'), 'Debe titular la ruta metodológica');
   assert.ok(content.includes('completedCount'), 'Debe computar el contador de etapas completadas');
 });
 
@@ -94,14 +97,22 @@ test('4. Botones de continuidad secuencial ("Siguiente paso") en todas las activ
   assert.ok(evalContent.includes('activity-continuity-bar'), 'EvaluationView debe contener barra de continuidad');
 });
 
-test('5. Estilos de ruta secuencial y adaptabilidad móvil en styles.css', () => {
+test('5. Adaptabilidad móvil en HeaderHUD y NavigationTabs', () => {
+  const headerPath = path.join(projectRoot, 'src/components/layout/HeaderHUD.tsx');
+  const headerContent = fs.readFileSync(headerPath, 'utf-8');
+  assert.ok(headerContent.includes('hud-stats-toggle-btn'), 'HeaderHUD debe tener botón de toggle para estadísticas');
+  assert.ok(headerContent.includes('hud-tools-toggle-btn'), 'HeaderHUD debe tener botón de toggle para Herramientas en móvil');
+  assert.ok(headerContent.includes('tools-panel-open'), 'HeaderHUD debe manejar clase tools-panel-open');
+
+  const navPath = path.join(projectRoot, 'src/components/layout/NavigationTabs.tsx');
+  const navContent = fs.readFileSync(navPath, 'utf-8');
+  assert.ok(navContent.includes('nav-mobile-bar'), 'NavigationTabs debe tener barra móvil compacta');
+  assert.ok(navContent.includes('nav-mobile-toggle-btn'), 'NavigationTabs debe tener botón de toggle de ruta en móvil');
+  assert.ok(navContent.includes('mobile-expanded'), 'NavigationTabs debe manejar clase mobile-expanded');
+
   const cssPath = path.join(projectRoot, 'src/styles/styles.css');
   const css = fs.readFileSync(cssPath, 'utf-8');
-
-  assert.ok(css.includes('.nav-step-num'), '.nav-step-num debe estar definido');
-  assert.ok(css.includes('.nav-tab-subtitle'), '.nav-tab-subtitle debe estar definido');
-  assert.ok(css.includes('.nav-route-progress-bar'), '.nav-route-progress-bar debe estar definido');
-  assert.ok(css.includes('.nav-route-banner'), '.nav-route-banner debe estar definido');
-  assert.ok(css.includes('.activity-continuity-bar'), '.activity-continuity-bar debe estar definido');
-  assert.ok(css.includes('.continuity-next-btn'), '.continuity-next-btn debe estar definido');
+  assert.ok(css.includes('.nav-mobile-bar'), '.nav-mobile-bar debe estar definido en CSS');
+  assert.ok(css.includes('.hud-tools-toggle-btn'), '.hud-tools-toggle-btn debe estar definido en CSS');
+  assert.ok(css.includes('.hud-stats-toggle-btn'), '.hud-stats-toggle-btn debe estar definido en CSS');
 });
