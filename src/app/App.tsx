@@ -49,6 +49,26 @@ export const App: React.FC = () => {
         {renderActiveView()}
       </main>
 
+      {/* Global Discreet Footer */}
+      <footer
+        className="app-global-footer"
+        style={{
+          width: '100%',
+          textAlign: 'center',
+          padding: '16px 20px',
+          marginTop: 'auto',
+          fontSize: '0.8rem',
+          color: 'var(--text-muted)',
+          borderTop: '1px solid var(--border-color)',
+          backgroundColor: 'transparent',
+          letterSpacing: '0.03em',
+          userSelect: 'none',
+          lineHeight: 1.4,
+        }}
+      >
+        CIPAS: A. A. A. D. · Ingeniería de Sistemas · 2026B
+      </footer>
+
       {/* Global Modals */}
       <WizardModal />
       <CardInspectorModal />

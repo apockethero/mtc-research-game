@@ -20,7 +20,6 @@ import {
 } from '../../types/evaluation';
 import { EvaluationVisualCard } from './EvaluationVisualCard';
 import { soundEngine } from '../../services/soundEngine';
-import { ResearcherAdminModal } from '../../components/admin/ResearcherAdminModal';
 
 export const EvaluationView: React.FC = () => {
   const { deck, setActiveTab } = useSession();
@@ -44,7 +43,6 @@ export const EvaluationView: React.FC = () => {
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState<boolean>(false);
   const [validationAlert, setValidationAlert] = useState<string | null>(null);
-  const [isResearcherModalOpen, setIsResearcherModalOpen] = useState<boolean>(false);
 
   const isGuided = session.evaluationMode === 'guiado';
 
@@ -154,14 +152,6 @@ export const EvaluationView: React.FC = () => {
                   Reiniciar
                 </button>
               )}
-              <button
-                className="cyber-btn cyber-btn-outline"
-                style={{ fontSize: '11px', padding: '4px 10px' }}
-                onClick={() => setIsResearcherModalOpen(true)}
-                title="Acceso al panel administrativo y base de datos central de investigación"
-              >
-                🔒 Investigador
-              </button>
             </div>
           </div>
 
@@ -1606,11 +1596,6 @@ export const EvaluationView: React.FC = () => {
           </div>
         )}
 
-        {/* Panel Administrativo del Investigador */}
-        <ResearcherAdminModal
-          isOpen={isResearcherModalOpen}
-          onClose={() => setIsResearcherModalOpen(false)}
-        />
       </div>
     </div>
   );

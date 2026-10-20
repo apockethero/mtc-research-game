@@ -1,0 +1,31 @@
+========================================================================
+  MTC RESEARCH GAME — INSTRUCCIONES DE USO LOCAL (WINDOWS)
+========================================================================
+
+Bienvenido/a a la evaluacion cientifica y juego interactivo del modelo MTC
+(Tarjetas de Revision del Estado del Arte en Triciclos Electricos Ligeros).
+
+COMO JUGAR:
+1. Haz doble clic en el archivo "INICIAR_JUEGO.bat".
+2. Se abrira una ventana de consola y tu navegador web se abrira
+   automaticamente en la direccion local: http://127.0.0.1:8080/
+3. Sigue las instrucciones en pantalla para explorar las tarjetas, jugar los
+   desafios y completar la evaluacion.
+
+TRANSMISION DE RESULTADOS Y PRIVACIDAD:
+- Si tu computador tiene conexion a internet, tu evaluacion se transmitira
+  de forma segura y anonima a la base de datos central de investigacion.
+- Si no tienes conexion a internet, tus respuestas quedaran guardadas en tu
+  navegador y podras descargar tu copia en JSON o CSV al finalizar.
+- No se recolectan nombres, telefonos ni datos de identificacion personal.
+
+COMO CERRAR EL JUEGO:
+- Cierra la pestaña de tu navegador.
+- Cierra la ventana negra de consola (o presiona Ctrl + C dentro de ella).
+
+REQUISITOS DEL SISTEMA:
+- Sistema Operativo: Windows 10 o Windows 11.
+- Navegador recomendado: Google Chrome, Microsoft Edge, Mozilla Firefox o Brave.
+- No requiere conexin de red local (LAN) ni privilegios de administrador.
+- No requiere instalar Node.js ni ningun software adicional.
+========================================================================

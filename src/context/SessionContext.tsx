@@ -40,6 +40,7 @@ interface SessionContextValue {
 }
 
 const STORAGE_KEY = 'mtc_research_game_state_v2';
+const SOUND_STORAGE_KEY = 'mtc_sound_enabled';
 
 const SessionContext = createContext<SessionContextValue | undefined>(undefined);
 
@@ -51,7 +52,23 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const [matrixGroups, setMatrixGroups] = useState<Record<string, Card[]>>({});
   const [discoveredGaps, setDiscoveredGaps] = useState<ResearchGap[]>([]);
   const [combats, setCombats] = useState<CombatRecord[]>([]);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() => {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        const savedSound = window.localStorage.getItem(SOUND_STORAGE_KEY);
+        if (savedSound !== null) {
+          const isEnabled = JSON.parse(savedSound);
+          if (typeof isEnabled === 'boolean') {
+            soundEngine.setEnabled(isEnabled);
+            return isEnabled;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn("Could not load saved sound preference:", e);
+    }
+    return true;
+  });
   const [selectedCardForInspection, setSelectedCardForInspection] = useState<Card | null>(null);
   const [activeTab, setActiveTab] = useState<NavTab>('deck');
   const [isWizardOpen, setWizardOpen] = useState<boolean>(false);
@@ -59,6 +76,17 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   // Intentar restaurar sesión guardada
   useEffect(() => {
     try {
+      // Si la evaluación anterior ya quedó completada y confirmada en Supabase,
+      // la partida de minijuegos debe iniciar limpia para el nuevo participante
+      const evalRaw = localStorage.getItem('mtc_scientific_evaluation_session_v1');
+      if (evalRaw) {
+        const parsedEval = JSON.parse(evalRaw);
+        if (parsedEval.isComplete && parsedEval.cloudSubmissionStatus === 'synced') {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+        }
+      }
+
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -96,6 +124,13 @@ export const SessionProvider: React.FC<{ children: ReactNode }> = ({ children })
   const toggleSound = () => {
     const isNowOn = soundEngine.toggleSound();
     setSoundEnabled(isNowOn);
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(SOUND_STORAGE_KEY, JSON.stringify(isNowOn));
+      }
+    } catch (e) {
+      console.warn("Could not save sound preference to localStorage:", e);
+    }
   };
 
   const inspectCard = (card: Card | null) => {

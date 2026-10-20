@@ -79,7 +79,7 @@ La Edge Function (`submit-evaluation`) incluye un mecanismo de alerta instantán
 | Fase | Duración | Procedimiento |
 | :--- | :--- | :--- |
 | **Recolección Activa** | Duración del estudio piloto | Almacenamiento seguro en PostgreSQL (Supabase) con encriptación en reposo (AES-256). |
-| **Análisis y Validación** | 12 a 24 meses | Descargas consolidadas mediante el panel seguro de investigador (`ResearcherAdminModal`) protegido por JWT. |
+| **Análisis y Validación** | 12 a 24 meses | Descargas consolidadas directamente desde Supabase Dashboard (Table Editor -> Export to CSV) o consultas SQL autenticadas en entorno seguro. |
 | **Preservación a Largo Plazo** | 5 años post-publicación | Datasets curados y anonimizados almacenados en repositorios de investigación científica abierta (Zenodo/OSF). |
 | **Derecho de Supresión (Eliminación)** | Solicitud a petición | Un participante puede contactar al investigador principal proveyendo su `sessionId` (visible en la interfaz final) para solicitar la eliminación irrevocable de su registro en la base de datos central. |
 
@@ -116,10 +116,10 @@ La Edge Function (`submit-evaluation`) incluye un mecanismo de alerta instantán
                        | - service_role: ALL               |
                        +-----------------------------------+
                                          ^
-                                         | SELECT (JWT Autenticado)
+                                         | SELECT / Export CSV (Autenticado)
                        +-----------------+-----------------+
-                       | Panel de Investigador             |
-                       | ResearcherAdminModal.tsx          |
+                       | Supabase Dashboard                |
+                       | (Table Editor / Export to CSV)    |
                        +-----------------------------------+
 ```
 

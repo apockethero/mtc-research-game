@@ -101,17 +101,32 @@ CREATE INDEX IF NOT EXISTS idx_evaluations_notification_sent
     WHERE notification_sent = FALSE;
 
 -- ============================================================================
--- 5. POLÍTICAS DE SEGURIDAD A NIVEL DE FILA (ROW LEVEL SECURITY - RLS)
+-- 5. SEGURIDAD: PRIVILEGIOS SQL EXPLÍCITOS (DEFENSA EN PROFUNDIDAD)
+-- ============================================================================
+-- Revocar todos los privilegios por defecto a roles públicos y anónimos
+REVOKE ALL ON TABLE public.scientific_evaluations FROM PUBLIC, anon;
+REVOKE ALL ON TABLE public.researcher_profiles FROM PUBLIC, anon;
+REVOKE ALL ON TABLE public.evaluation_rate_limits FROM PUBLIC, anon, authenticated;
+
+-- Otorgar privilegios mínimos requeridos
+-- service_role: Control total para la Edge Function de ingesta y tareas de administración
+GRANT ALL ON TABLE public.scientific_evaluations TO service_role;
+GRANT ALL ON TABLE public.researcher_profiles TO service_role;
+GRANT ALL ON TABLE public.evaluation_rate_limits TO service_role;
+
+-- authenticated: Exclusivamente lectura (SELECT), sujeta a las políticas RLS
+GRANT SELECT ON TABLE public.scientific_evaluations TO authenticated;
+GRANT SELECT ON TABLE public.researcher_profiles TO authenticated;
+
+-- ============================================================================
+-- 6. POLÍTICAS DE SEGURIDAD A NIVEL DE FILA (ROW LEVEL SECURITY - RLS)
 -- ============================================================================
 -- Habilitar RLS en todas las tablas
 ALTER TABLE public.scientific_evaluations ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.researcher_profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.evaluation_rate_limits ENABLE ROW LEVEL SECURITY;
 
--- REGLA FUNDAMENTAL: El rol 'anon' (público / cliente) NO tiene permisos de SELECT,
--- UPDATE ni DELETE sobre ninguna evaluación. Tampoco puede consultar registros ajenos.
-
--- Política 1: El service_role (usado exclusivamente por la Edge Function) tiene control total
+-- Política 1: service_role (Edge Function) tiene acceso completo para insertar y consultar
 CREATE POLICY "service_role_full_access" 
     ON public.scientific_evaluations 
     FOR ALL 
@@ -119,7 +134,7 @@ CREATE POLICY "service_role_full_access"
     USING (true) 
     WITH CHECK (true);
 
--- Política 2: Los investigadores autenticados pueden consultar y exportar datos
+-- Política 2: Investigadores autorizados únicamente si existen en public.researcher_profiles
 CREATE POLICY "researcher_select_evaluations" 
     ON public.scientific_evaluations 
     FOR SELECT 
@@ -129,10 +144,9 @@ CREATE POLICY "researcher_select_evaluations"
             SELECT 1 FROM public.researcher_profiles 
             WHERE user_id = auth.uid()
         )
-        OR auth.jwt() ->> 'role' = 'researcher'
     );
 
--- Política 3: Investigadores pueden consultar su propio perfil
+-- Política 3: Investigadores pueden consultar únicamente su propio perfil
 CREATE POLICY "researcher_view_own_profile" 
     ON public.researcher_profiles 
     FOR SELECT 
@@ -148,12 +162,13 @@ CREATE POLICY "service_role_rate_limits"
     WITH CHECK (true);
 
 -- ============================================================================
--- 6. FUNCIÓN DE LIMPIEZA AUTOMÁTICA DE REGISTROS DE RATE LIMITING
+-- 7. FUNCIÓN DE MANTENIMIENTO: LIMPIEZA DE RATE LIMITS
 -- ============================================================================
 CREATE OR REPLACE FUNCTION public.cleanup_stale_rate_limits()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 BEGIN
     -- Elimina ventanas de rate limit más antiguas a 2 horas (120 minutos)
@@ -161,3 +176,10 @@ BEGIN
     WHERE window_minute < (EXTRACT(EPOCH FROM NOW()) / 60) - 120;
 END;
 $$;
+
+-- Restringir estrictamente la ejecución de la función de mantenimiento
+-- Revocar ejecución de PUBLIC, anon y authenticated
+REVOKE ALL ON FUNCTION public.cleanup_stale_rate_limits() FROM PUBLIC, anon, authenticated;
+
+-- Permitir ejecución únicamente al service_role (e.g. pg_cron o tareas programadas de servidor)
+GRANT EXECUTE ON FUNCTION public.cleanup_stale_rate_limits() TO service_role;

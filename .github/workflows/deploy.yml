@@ -1,0 +1,80 @@
+# ============================================================================
+# MTC Research Game - Despliegue Oficial en GitHub Pages
+# Desencadenador: EXCLUSIVAMENTE MANUAL (workflow_dispatch)
+# Repositorio previsto: apockethero/mtc-research-game
+# ============================================================================
+
+name: Deploy MTC Research Game to GitHub Pages
+
+on:
+  # Solo se ejecuta cuando el propietario del repositorio lo activa manualmente
+  workflow_dispatch:
+
+# Permisos mínimos requeridos para desplegar artefactos en GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Permite solo un despliegue concurrente para evitar conflictos de estado
+concurrency:
+  group: 'pages'
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js (v20 LTS)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install dependencies from lockfile
+        run: npm ci
+
+      - name: Run automated test suite
+        run: npm test
+
+      - name: Verify TypeScript types
+        run: npm run typecheck
+
+      # Compilación de producción con inyección de variables públicas de Supabase
+      # NOTA IMPORTANTE:
+      # Configura estas variables en GitHub:
+      #   Settings -> Secrets and variables -> Actions -> Variables
+      #   - VITE_SUPABASE_URL: URL base pública del proyecto (ej. https://kohealboprmblobyzvqa.supabase.co)
+      #   - VITE_SUPABASE_ANON_KEY: Clave pública anon / publishable (sb_publishable_...)
+      #   - VITE_INGESTION_FUNCTION_URL (Opcional): URL directa del endpoint si difiere del estándar
+      - name: Build production bundle for GitHub Pages
+        env:
+          GITHUB_PAGES: 'true'
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+          VITE_INGESTION_FUNCTION_URL: ${{ vars.VITE_INGESTION_FUNCTION_URL }}
+        run: npm run build
+
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
+
+  deploy:
+    name: Deploy to GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

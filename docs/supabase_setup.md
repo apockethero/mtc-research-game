@@ -30,10 +30,10 @@ El sistema implementa una arquitectura desacoplada y orientada a la minimizació
 [ Proveedor Transaccional: Resend API ] ──► [ Correo del Investigador ]
                                              - Notifica recepción
                                              - Sin respuestas abiertas ni PII
-                                             - Enlace al panel administrativo
+                                             - Enlace a Supabase Dashboard
              ▲
-             │ (7) Consulta autenticada y exportación consolidada
-[ Panel Administrativo del Investigador ]
+             │ (7) Consulta e inspección directa y exportación a CSV
+[ Supabase Dashboard (Table Editor / Export to CSV) ]
 ```
 
 ---
@@ -110,22 +110,14 @@ La función quedará disponible en:
 
 ---
 
-### Paso 6: Crear el Usuario Investigador para el Panel Privado
-Para que el investigador pueda autenticarse en el panel privado de la aplicación o consultar directamente los datos:
+### Paso 6: Consulta y Exportación de Datos en Supabase Dashboard
+Para consultar, filtrar y exportar las evaluaciones consolidadas sin necesidad de un panel administrativo en el cliente:
 
-1. En Supabase Dashboard, dirígete a **Authentication -> Users**.
-2. Pulsa en **"Add User"** -> **"Create User"**.
-3. Ingresa el correo del investigador y una contraseña robusta.
-4. En **SQL Editor**, vincula el usuario a la tabla de investigadores autorizados:
-   ```sql
-   INSERT INTO public.researcher_profiles (user_id, email, full_name, role)
-   VALUES (
-     'UUID_DEL_USUARIO_CREADO',
-     'tu_correo_institucional@universidad.edu',
-     'Nombre del Investigador Principal',
-     'lead_investigator'
-   );
-   ```
+1. Accede a tu proyecto en [Supabase Dashboard](https://supabase.com/dashboard).
+2. Dirígete a **Table Editor -> scientific_evaluations**.
+3. Podrás inspeccionar en tiempo real cada registro recibido, su puntuación calculada, telemetría y respuestas cualitativas.
+4. Para descargar todos los registros consolidados compatibles con Excel, R o Python, pulsa en el botón **"Export to CSV"** en la barra superior del Table Editor.
+5. Para análisis estadísticos agregados, accede al **SQL Editor** y ejecuta consultas directas con privilegios de administrador.
 
 ---
 
@@ -160,4 +152,4 @@ Antes de declarar el sistema formalmente operativo en producción con participan
 - [ ] Crear las variables `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` en el entorno de despliegue frontend.
 - [ ] Realizar un envío de prueba completo y verificar que aparezca en la tabla `scientific_evaluations`.
 - [ ] Verificar la recepción del correo de notificación en la bandeja del investigador.
-- [ ] Abrir el panel administrativo en la app (`🔒 Investigador`), ingresar el token y descargar el archivo CSV consolidado de prueba.
+- [ ] Abrir Supabase Dashboard -> Table Editor -> scientific_evaluations, verificar la llegada del registro y exportar a CSV con el botón "Export to CSV".

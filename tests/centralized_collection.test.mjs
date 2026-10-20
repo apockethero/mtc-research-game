@@ -87,8 +87,6 @@ test('4. Tipos TypeScript del Cliente y Payload Centralizado', async () => {
   assert.ok(typesContent.includes('export interface CloudEvaluationPayload'), 'Debe exportar CloudEvaluationPayload');
   assert.ok(typesContent.includes('export interface CloudSubmissionResponse'), 'Debe exportar CloudSubmissionResponse');
   assert.ok(typesContent.includes('export type CloudSubmissionStatus'), 'Debe exportar CloudSubmissionStatus');
-  assert.ok(typesContent.includes('export interface ResearcherEvaluationRecord'), 'Debe exportar ResearcherEvaluationRecord');
-  assert.ok(typesContent.includes('export interface ResearcherMetricsSummary'), 'Debe exportar ResearcherMetricsSummary');
 
   // Comprobar actualización en src/types/evaluation.ts
   const evalTypesPath = path.join(projectRoot, 'src/types/evaluation.ts');
@@ -97,21 +95,21 @@ test('4. Tipos TypeScript del Cliente y Payload Centralizado', async () => {
   assert.ok(evalTypes.includes('cloudSubmissionStatus?:'), 'EvaluationSessionData debe contener cloudSubmissionStatus');
 });
 
-test('5. Servicio de Envío en la Nube: Detección Offline e Idempotencia', async () => {
+test('5. Servicio de Envío en la Nube: Ingesta Centralizada, Detección Offline e Idempotencia', async () => {
   const servicePath = path.join(projectRoot, 'src/services/cloudSubmissionService.ts');
   assert.ok(fs.existsSync(servicePath), 'cloudSubmissionService.ts debe existir');
 
   const svcContent = fs.readFileSync(servicePath, 'utf-8');
 
-  // Funciones de servicio requeridas
+  // Funciones de servicio requeridas para el participante
   assert.ok(svcContent.includes('isCloudConfigured ='), 'isCloudConfigured debe existir');
   assert.ok(svcContent.includes('getOrCreateClientSubmissionId ='), 'getOrCreateClientSubmissionId debe existir');
   assert.ok(svcContent.includes('buildCloudPayload ='), 'buildCloudPayload debe existir');
   assert.ok(svcContent.includes('submitEvaluationToCloud ='), 'submitEvaluationToCloud debe existir');
-  assert.ok(svcContent.includes('fetchCloudEvaluations ='), 'fetchCloudEvaluations debe existir');
-  assert.ok(svcContent.includes('calculateResearcherMetrics ='), 'calculateResearcherMetrics debe existir');
-  assert.ok(svcContent.includes('exportConsolidatedCloudCSV ='), 'exportConsolidatedCloudCSV debe existir');
-  assert.ok(svcContent.includes('exportConsolidatedCloudJSON ='), 'exportConsolidatedCloudJSON debe existir');
+
+  // Funciones administrativas retiradas del cliente por seguridad y simplificación
+  assert.ok(!svcContent.includes('fetchCloudEvaluations'), 'fetchCloudEvaluations no debe estar expuesto en el cliente');
+  assert.ok(!svcContent.includes('calculateResearcherMetrics'), 'calculateResearcherMetrics no debe estar expuesto en el cliente');
 
   // Timeout y prevención de cuelgues
   assert.ok(svcContent.includes('AbortController'), 'Debe usar AbortController con tiempo límite');
@@ -247,22 +245,21 @@ test('8. Exportación Consolidada de Datos: CSV Escapado y JSON Estructurado', (
   assert.strictEqual(parsed.records[0].session_id, 'MTC-EVAL-111111');
 });
 
-test('9. Interfaz de Usuario: Tarjeta de Sincronización y Modal de Investigador', () => {
+test('9. Interfaz de Usuario: Tarjeta de Sincronización y Frontend Simplificado (Sin Panel Administrativo)', () => {
   const evalViewPath = path.join(projectRoot, 'src/features/evaluation/EvaluationView.tsx');
   const evalView = fs.readFileSync(evalViewPath, 'utf-8');
 
+  // Conservar tarjeta de sincronización y reintento para el participante
   assert.ok(evalView.includes('eval-cloud-status-card'), 'Debe incluir la tarjeta de estado en la nube');
   assert.ok(evalView.includes('retryCloudSubmission'), 'Debe permitir reintentar el envío');
-  assert.ok(evalView.includes('ResearcherAdminModal'), 'Debe importar el modal del investigador');
-  assert.ok(evalView.includes('setIsResearcherModalOpen(true)'), 'Debe abrir el modal del investigador');
-  assert.ok(evalView.includes('Investigador'), 'Debe contener botón de acceso para investigador');
+
+  // Verificar la retirada total del panel administrativo y accesos de investigador en la interfaz del participante
+  assert.ok(!evalView.includes('ResearcherAdminModal'), 'NO debe importar ni montar el modal del investigador');
+  assert.ok(!evalView.includes('isResearcherModalOpen'), 'NO debe contener estado de apertura de modal administrativo');
+  assert.ok(!evalView.includes('🔒 Investigador'), 'NO debe exponer botón de acceso administrativo al participante');
 
   const modalPath = path.join(projectRoot, 'src/components/admin/ResearcherAdminModal.tsx');
-  assert.ok(fs.existsSync(modalPath), 'ResearcherAdminModal.tsx debe existir');
-  const modalContent = fs.readFileSync(modalPath, 'utf-8');
-  assert.ok(modalContent.includes('PANEL PRIVADO DE INVESTIGACIÓN'), 'Debe tener título de administración');
-  assert.ok(modalContent.includes('exportConsolidatedCloudCSV'), 'Debe invocar exportConsolidatedCloudCSV');
-  assert.ok(modalContent.includes('exportConsolidatedCloudJSON'), 'Debe invocar exportConsolidatedCloudJSON');
+  assert.ok(!fs.existsSync(modalPath), 'ResearcherAdminModal.tsx no debe existir en el frontend simplificado');
 });
 
 test('10. Documentación de Arquitectura y Gobernanza Ética', () => {
@@ -278,4 +275,306 @@ test('10. Documentación de Arquitectura y Gobernanza Ética', () => {
   assert.ok(govDoc.includes('Minimización de Datos'), 'Debe cubrir minimización');
   assert.ok(govDoc.includes('Seudonimización Unidireccional de Direcciones IP'), 'Debe cubrir hash salado de IP');
   assert.ok(govDoc.includes('Modo Guiado / Lúdico'), 'Debe cubrir salvaguardas para menores');
+});
+
+test('11. useEvaluationSession: Auditoría de Flujo Asíncrono y Erradicación del Fallo en setSession', () => {
+  const hookPath = path.join(projectRoot, 'src/hooks/useEvaluationSession.ts');
+  assert.ok(fs.existsSync(hookPath), 'useEvaluationSession.ts debe existir');
+
+  const hookContent = fs.readFileSync(hookPath, 'utf-8');
+
+  // 1. Verificar que NO se use el antipatrón de asignación en callback de setSession
+  assert.ok(!hookContent.includes('completedSession = updated'), 'NO debe mutar completedSession dentro de callback de setSession');
+  assert.ok(!hookContent.includes('targetSession = updated'), 'NO debe mutar targetSession dentro de callback de setSession');
+
+  // 2. Verificar construcción explícita previa al envío
+  assert.ok(hookContent.includes('const completedSession: EvaluationSessionData = {'), 'Debe construir completedSession explícitamente antes del envío');
+  assert.ok(hookContent.includes('submitEvaluationToCloud(completedSession)'), 'Debe pasar completedSession a submitEvaluationToCloud');
+  assert.ok(hookContent.includes('submitEvaluationToCloud(retryingSession)'), 'Debe pasar retryingSession a submitEvaluationToCloud');
+
+  // 3. Guardia contra doble pulsación
+  assert.ok(hookContent.includes('isSubmittingRef'), 'Debe incluir isSubmittingRef como guardia contra doble pulsación');
+  assert.ok(hookContent.includes("session.cloudSubmissionStatus === 'submitting'"), 'Debe validar que no se esté transmitiendo');
+
+  // 4. Recuperación segura de localStorage si quedó en submitting
+  assert.ok(hookContent.includes("parsed.cloudSubmissionStatus === 'submitting'"), 'Debe comprobar si localStorage tenía submitting');
+  assert.ok(hookContent.includes("? 'failed'"), 'Debe degradar a failed para permitir reintentos');
+});
+
+test('12. Simulación de Transición de Estados: Éxito (synced), Error (failed), Reintento (idempotencia) y Modo Local', async () => {
+  // Estado base de sesión
+  let sessionState = {
+    sessionId: 'MTC-EVAL-TEST123',
+    instrumentVersion: '1.1.0-multimodal-exp',
+    evaluationMode: 'guiado',
+    consentGiven: true,
+    isComplete: false,
+    cloudSubmissionStatus: 'idle',
+    cloudRetryCount: 0,
+    clientSubmissionId: undefined,
+    cloudSubmissionTimestamp: undefined,
+    cloudSubmissionError: undefined
+  };
+
+  let submitCallCount = 0;
+  let lastSubmittedPayload = null;
+
+  // Mock del servicio de envío
+  const mockSubmitToCloud = async (sessionPayload, shouldFail = false) => {
+    submitCallCount++;
+    lastSubmittedPayload = sessionPayload;
+    if (shouldFail) {
+      return {
+        success: false,
+        status: 'failed',
+        error: 'Network timeout (15s)',
+        clientSubmissionId: sessionPayload.clientSubmissionId
+      };
+    }
+    return {
+      success: true,
+      status: 'synced',
+      serverReceivedAt: '2026-10-20T03:00:00.000Z',
+      clientSubmissionId: sessionPayload.clientSubmissionId
+    };
+  };
+
+  // Simulación del flujo de completeEvaluation
+  const simulateComplete = async (isConfigured, shouldFail = false) => {
+    const subId = sessionState.clientSubmissionId || `sub_${sessionState.sessionId}_12345`;
+    const updated = {
+      ...sessionState,
+      isComplete: true,
+      currentStage: 'stage_complete',
+      clientSubmissionId: subId,
+      cloudSubmissionStatus: isConfigured ? 'submitting' : 'unconfigured'
+    };
+    sessionState = updated;
+
+    if (!isConfigured) return;
+
+    const result = await mockSubmitToCloud(updated, shouldFail);
+    sessionState = {
+      ...sessionState,
+      cloudSubmissionStatus: result.status,
+      cloudSubmissionTimestamp: result.serverReceivedAt || sessionState.cloudSubmissionTimestamp,
+      cloudSubmissionError: result.error
+    };
+  };
+
+  // Simulación del flujo de retryCloudSubmission
+  const simulateRetry = async (isConfigured, shouldFail = false) => {
+    const subId = sessionState.clientSubmissionId || `sub_${sessionState.sessionId}_generated`;
+    const retrying = {
+      ...sessionState,
+      clientSubmissionId: subId,
+      cloudSubmissionStatus: isConfigured ? 'submitting' : 'unconfigured',
+      cloudRetryCount: sessionState.cloudRetryCount + 1,
+      cloudSubmissionError: undefined
+    };
+    sessionState = retrying;
+
+    if (!isConfigured) return;
+
+    const result = await mockSubmitToCloud(retrying, shouldFail);
+    sessionState = {
+      ...sessionState,
+      cloudSubmissionStatus: result.status,
+      cloudSubmissionTimestamp: result.serverReceivedAt || sessionState.cloudSubmissionTimestamp,
+      cloudSubmissionError: result.error
+    };
+  };
+
+  // CASO 1: Finalización con error de red -> debe quedar en 'failed' y registrar error
+  await simulateComplete(true, true);
+  assert.strictEqual(submitCallCount, 1, 'Debe haber llamado a submitEvaluationToCloud');
+  assert.strictEqual(sessionState.cloudSubmissionStatus, 'failed', 'Estado debe ser failed');
+  assert.strictEqual(sessionState.cloudSubmissionError, 'Network timeout (15s)');
+  assert.ok(sessionState.clientSubmissionId.startsWith('sub_MTC-EVAL-TEST123_'), 'Debe generar clientSubmissionId');
+  const originalSubId = sessionState.clientSubmissionId;
+
+  // CASO 2: Reintento sobre la sesión fallida -> debe conservar el MISMO clientSubmissionId (idempotencia)
+  await simulateRetry(true, false);
+  assert.strictEqual(submitCallCount, 2, 'Debe haber llamado a submitEvaluationToCloud en el reintento');
+  assert.strictEqual(sessionState.cloudSubmissionStatus, 'synced', 'Estado debe cambiar a synced tras reintento exitoso');
+  assert.strictEqual(sessionState.clientSubmissionId, originalSubId, 'El clientSubmissionId DEBE ser exactamente el mismo para idempotencia');
+  assert.strictEqual(sessionState.cloudRetryCount, 1, 'cloudRetryCount debe incrementarse');
+  assert.strictEqual(sessionState.cloudSubmissionTimestamp, '2026-10-20T03:00:00.000Z');
+
+  // CASO 3: Modo local / sin nube configurada -> estado debe ser 'unconfigured' sin invocar servicio
+  const localSession = {
+    sessionId: 'MTC-LOCAL-001',
+    isComplete: false,
+    cloudSubmissionStatus: 'idle',
+    cloudRetryCount: 0
+  };
+  sessionState = localSession;
+  const callsBeforeLocal = submitCallCount;
+  await simulateComplete(false); // isConfigured = false
+  assert.strictEqual(submitCallCount, callsBeforeLocal, 'NO debe llamar a submitEvaluationToCloud si no está configurada la nube');
+  assert.strictEqual(sessionState.cloudSubmissionStatus, 'unconfigured', 'Estado debe ser unconfigured en modo local');
+  assert.strictEqual(sessionState.isComplete, true, 'isComplete debe quedar en true');
+});
+
+test('13. Reinicio Automático Multi-Participante: Limpieza post-sincronización, persistencia selectiva y preservación de preferencias', () => {
+  // Simulación del motor de almacenamiento localStorage
+  const mockLocalStorage = new Map();
+  const localStorageMock = {
+    getItem: (key) => mockLocalStorage.get(key) || null,
+    setItem: (key, val) => mockLocalStorage.set(key, String(val)),
+    removeItem: (key) => mockLocalStorage.delete(key),
+    clear: () => mockLocalStorage.clear()
+  };
+
+  const EVAL_KEY = 'mtc_scientific_evaluation_session_v1';
+  const GAME_KEY = 'mtc_research_game_state_v2';
+  const THEME_KEY = 'mtc_theme';
+  const SOUND_KEY = 'mtc_sound_enabled';
+
+  // Configurar preferencias previas del usuario
+  localStorageMock.setItem(THEME_KEY, 'dark');
+  localStorageMock.setItem(SOUND_KEY, JSON.stringify(true));
+
+  // Función idéntica al inicializador de useEvaluationSession
+  const initializeEvaluationSession = () => {
+    const raw = localStorageMock.getItem(EVAL_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && parsed.sessionId) {
+        // Si está completada Y sincronizada con la nube -> REINICIO AUTOMÁTICO
+        if (parsed.isComplete === true && parsed.cloudSubmissionStatus === 'synced') {
+          localStorageMock.removeItem(EVAL_KEY);
+          localStorageMock.removeItem(GAME_KEY);
+
+          const fresh = {
+            sessionId: `MTC-EVAL-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+            evaluationMode: parsed.evaluationMode || 'guiado',
+            startedAt: new Date().toISOString(),
+            consentGiven: false,
+            currentStage: 'stage_0_consent',
+            k1Responses: {},
+            k2Responses: {},
+            k3Responses: {},
+            k4Responses: {},
+            k5k6Responses: {},
+            qualitativeComments: {},
+            isComplete: false,
+            cloudSubmissionStatus: 'idle',
+            cloudRetryCount: 0
+          };
+          localStorageMock.setItem(EVAL_KEY, JSON.stringify(fresh));
+          return fresh;
+        }
+
+        const safeStatus = parsed.cloudSubmissionStatus === 'submitting'
+          ? 'failed'
+          : (parsed.cloudSubmissionStatus || 'idle');
+
+        return {
+          ...parsed,
+          cloudSubmissionStatus: safeStatus
+        };
+      }
+    }
+
+    const initial = {
+      sessionId: `MTC-EVAL-INIT001`,
+      evaluationMode: 'guiado',
+      consentGiven: false,
+      currentStage: 'stage_0_consent',
+      isComplete: false,
+      cloudSubmissionStatus: 'idle'
+    };
+    return initial;
+  };
+
+  // --- REQUISITO 1: Evaluación completada se muestra confirmada en pantalla ---
+  const completedEvaluation = {
+    sessionId: 'MTC-EVAL-PARTICIPANTE1',
+    evaluationMode: 'guiado',
+    consentGiven: true,
+    currentStage: 'stage_complete',
+    isComplete: true,
+    scores: { totalObjectiveScore: 7, percentage: 100 },
+    k1Responses: { q1CoreContribution: 'opt_a' },
+    cloudSubmissionStatus: 'synced',
+    cloudSubmissionTimestamp: '2026-10-20T04:00:00.000Z',
+    clientSubmissionId: 'sub_MTC-EVAL-PARTICIPANTE1_12345'
+  };
+  localStorageMock.setItem(EVAL_KEY, JSON.stringify(completedEvaluation));
+  localStorageMock.setItem(GAME_KEY, JSON.stringify({ timelineCards: ['MTC01'], combats: [{ id: 'c1' }] }));
+
+  // Se comprueba que antes del refresco los datos existen intactos
+  const sessionBeforeRefresh = JSON.parse(localStorageMock.getItem(EVAL_KEY));
+  assert.strictEqual(sessionBeforeRefresh.cloudSubmissionStatus, 'synced');
+  assert.strictEqual(sessionBeforeRefresh.sessionId, 'MTC-EVAL-PARTICIPANTE1');
+
+  // --- REQUISITO 2 y 3: Tras refrescar, se inicializa sesión nueva y limpia ---
+  const sessionAfterRefresh = initializeEvaluationSession();
+
+  assert.notStrictEqual(sessionAfterRefresh.sessionId, 'MTC-EVAL-PARTICIPANTE1', 'El nuevo sessionId debe ser distinto');
+  assert.strictEqual(sessionAfterRefresh.isComplete, false, 'La nueva sesión no debe estar completada');
+  assert.strictEqual(sessionAfterRefresh.consentGiven, false, 'El consentimiento debe reiniciarse');
+  assert.strictEqual(sessionAfterRefresh.currentStage, 'stage_0_consent', 'Debe iniciar en la etapa 0 de consentimiento');
+  assert.deepStrictEqual(sessionAfterRefresh.k1Responses, {}, 'Las respuestas anteriores no deben aparecer en la nueva');
+  assert.strictEqual(sessionAfterRefresh.scores, undefined, 'Las puntuaciones anteriores no deben existir');
+  assert.strictEqual(sessionAfterRefresh.clientSubmissionId, undefined, 'El token de envío no debe heredarse');
+
+  // --- REQUISITO 4: Preferencias de tema y sonido se conservan ---
+  assert.strictEqual(localStorageMock.getItem(THEME_KEY), 'dark', 'El tema debe conservarse intacto');
+  assert.strictEqual(JSON.parse(localStorageMock.getItem(SOUND_KEY)), true, 'La preferencia de sonido debe conservarse intacta');
+
+  // --- REQUISITO 5: Evaluaciones pendientes o fallidas NO se reinician al refrescar ---
+  const failedEvaluation = {
+    sessionId: 'MTC-EVAL-PENDIENTE',
+    evaluationMode: 'investigacion',
+    consentGiven: true,
+    currentStage: 'stage_complete',
+    isComplete: true,
+    k1Responses: { q1CoreContribution: 'opt_b' },
+    cloudSubmissionStatus: 'failed',
+    cloudSubmissionError: 'Error de conexión',
+    clientSubmissionId: 'sub_MTC-EVAL-PENDIENTE_99999'
+  };
+  localStorageMock.setItem(EVAL_KEY, JSON.stringify(failedEvaluation));
+
+  const sessionAfterRefreshFailed = initializeEvaluationSession();
+  assert.strictEqual(sessionAfterRefreshFailed.sessionId, 'MTC-EVAL-PENDIENTE', 'Sesión fallida debe conservarse');
+  assert.strictEqual(sessionAfterRefreshFailed.isComplete, true, 'isComplete debe conservarse para permitir reintento');
+  assert.strictEqual(sessionAfterRefreshFailed.k1Responses.q1CoreContribution, 'opt_b', 'Respuestas deben conservarse');
+  assert.strictEqual(sessionAfterRefreshFailed.cloudSubmissionStatus, 'failed', 'Estado debe mantenerse como failed');
+
+  // --- REQUISITO 6: Refrescos múltiples no crean duplicados ni reenvían ---
+  // Tras sincronizarse una evaluación:
+  const syncedEval = {
+    sessionId: 'MTC-EVAL-SYNCED',
+    isComplete: true,
+    cloudSubmissionStatus: 'synced',
+    clientSubmissionId: 'sub_synced_123'
+  };
+  localStorageMock.setItem(EVAL_KEY, JSON.stringify(syncedEval));
+
+  // Primer refresco: detecta synced y reinicia a sesión limpia
+  const firstRefresh = initializeEvaluationSession();
+  assert.strictEqual(firstRefresh.isComplete, false, 'Primer refresco genera sesión limpia');
+  assert.strictEqual(firstRefresh.cloudSubmissionStatus, 'idle');
+  assert.notStrictEqual(firstRefresh.sessionId, 'MTC-EVAL-SYNCED');
+
+  // Segundo refresco: la sesión ya es limpia (isComplete: false, idle), se mantiene limpia
+  const secondRefresh = initializeEvaluationSession();
+  assert.strictEqual(secondRefresh.isComplete, false, 'Segundo refresco conserva sesión limpia');
+  assert.strictEqual(secondRefresh.cloudSubmissionStatus, 'idle');
+  assert.strictEqual(secondRefresh.sessionId, firstRefresh.sessionId, 'Conserva la misma sesión limpia en curso');
+
+  // --- REQUISITO 7: Modo local sin conexión (unconfigured) se conserva al refrescar ---
+  const unconfiguredEval = {
+    sessionId: 'MTC-EVAL-LOCALONLY',
+    isComplete: true,
+    cloudSubmissionStatus: 'unconfigured',
+    k1Responses: { q1CoreContribution: 'opt_c' }
+  };
+  localStorageMock.setItem(EVAL_KEY, JSON.stringify(unconfiguredEval));
+  const sessionAfterRefreshLocal = initializeEvaluationSession();
+  assert.strictEqual(sessionAfterRefreshLocal.sessionId, 'MTC-EVAL-LOCALONLY', 'Evaluación local debe preservarse');
+  assert.strictEqual(sessionAfterRefreshLocal.cloudSubmissionStatus, 'unconfigured');
 });

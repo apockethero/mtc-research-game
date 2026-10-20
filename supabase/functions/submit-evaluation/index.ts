@@ -287,7 +287,7 @@ En cumplimiento del principio de minimización y protección de datos, este corr
             "Authorization": `Bearer ${resendApiKey}`
           },
           body: JSON.stringify({
-            from: "MTC Research Game <notifications@mtcresearchgame.org>",
+            from: "MTC Research Game <onboarding@resend.dev>",
             to: [researcherEmail],
             subject: emailSubject,
             text: emailBody

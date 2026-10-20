@@ -37,6 +37,10 @@ class SoundEngine {
     return this.enabled;
   }
 
+  public setEnabled(val: boolean): void {
+    this.enabled = val;
+  }
+
   public playFlip() {
     if (!this.enabled || !this.ctx) return;
     this.ensureContext();

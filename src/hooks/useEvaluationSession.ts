@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   EvaluationSessionData,
   EvaluationStage,
@@ -95,9 +95,34 @@ export const useEvaluationSession = () => {
         if (raw) {
           const parsed = JSON.parse(raw);
           if (parsed && parsed.sessionId) {
+            // 1. REINICIO AUTOMÁTICO PARA NUEVO PARTICIPANTE:
+            // Si la evaluación anterior ya quedó completada Y confirmada en Supabase (status: 'synced'),
+            // el refresco de página indica que se inicia una nueva sesión limpia para el siguiente participante.
+            // Se inicializa una sesión fresca con nuevo sessionId, sin respuestas ni puntuaciones heredadas.
+            if (parsed.isComplete === true && parsed.cloudSubmissionStatus === 'synced') {
+              // Limpiar la sesión antigua de evaluación de localStorage
+              window.localStorage.removeItem(EVAL_STORAGE_KEY);
+              // También limpiar el estado de minijuegos para que el nuevo participante comience limpio
+              window.localStorage.removeItem('mtc_research_game_state_v2');
+
+              const initialMode = parsed.evaluationMode || 'guiado';
+              const freshSession = createInitialSession(initialMode);
+              window.localStorage.setItem(EVAL_STORAGE_KEY, JSON.stringify(freshSession));
+              return freshSession;
+            }
+
+            // 2. Si la sesión guardada quedó en 'submitting' (interrupción previa),
+            // recuperar a 'failed' para permitir reintento sin quedar congelada
+            const safeStatus = parsed.cloudSubmissionStatus === 'submitting'
+              ? 'failed'
+              : (parsed.cloudSubmissionStatus || 'idle');
+
+            // 3. Si la evaluación está pendiente de completar o falló el envío a la nube,
+            // conservar intactas todas las respuestas, puntuaciones y estado del participante actual
             return {
               ...createInitialSession(parsed.evaluationMode || 'guiado'),
-              ...parsed
+              ...parsed,
+              cloudSubmissionStatus: safeStatus
             };
           }
         }
@@ -118,6 +143,9 @@ export const useEvaluationSession = () => {
       console.warn('No se pudo guardar la sesión de evaluación en localStorage:', e);
     }
   }, [session]);
+
+  // Guardia de envío en curso para evitar dobles pulsaciones o envíos concurrentes
+  const isSubmittingRef = useRef<boolean>(false);
 
   const setEvaluationMode = useCallback((mode: EvaluationMode) => {
     setSession(prev => ({
@@ -205,76 +233,106 @@ export const useEvaluationSession = () => {
   }, []);
 
   const completeEvaluation = useCallback(async () => {
-    let completedSession: EvaluationSessionData | null = null;
-
-    setSession(prev => {
-      const scores = calculateObjectiveScores(prev.k1Responses, prev.k2Responses, prev.evaluationMode);
-      const subId = getOrCreateClientSubmissionId(prev);
-      const updated: EvaluationSessionData = {
-        ...prev,
-        isComplete: true,
-        completedAt: new Date().toISOString(),
-        currentStage: 'stage_complete',
-        objectiveScores: scores,
-        clientSubmissionId: subId,
-        cloudSubmissionStatus: isCloudConfigured() ? 'submitting' : 'unconfigured'
-      };
-      completedSession = updated;
-      return updated;
-    });
-
-    if (completedSession && isCloudConfigured()) {
-      try {
-        const result = await submitEvaluationToCloud(completedSession);
-        setSession(prev => ({
-          ...prev,
-          cloudSubmissionStatus: result.status,
-          cloudSubmissionTimestamp: result.serverReceivedAt || prev.cloudSubmissionTimestamp,
-          cloudSubmissionError: result.error
-        }));
-      } catch (err) {
-        setSession(prev => ({
-          ...prev,
-          cloudSubmissionStatus: 'failed',
-          cloudSubmissionError: err instanceof Error ? err.message : String(err)
-        }));
-      }
+    // Evitar envíos duplicados o doble pulsación mientras se transmite
+    if (isSubmittingRef.current || session.cloudSubmissionStatus === 'submitting') {
+      return;
     }
-  }, []);
+
+    // 1. Construir explícitamente el objeto de sesión completada antes del envío
+    const scores = calculateObjectiveScores(session.k1Responses, session.k2Responses, session.evaluationMode);
+    const subId = getOrCreateClientSubmissionId(session);
+    const isConfigured = isCloudConfigured();
+
+    const completedSession: EvaluationSessionData = {
+      ...session,
+      isComplete: true,
+      completedAt: session.completedAt || new Date().toISOString(),
+      currentStage: 'stage_complete',
+      objectiveScores: scores,
+      clientSubmissionId: subId,
+      cloudSubmissionStatus: isConfigured ? 'submitting' : 'unconfigured'
+    };
+
+    // 2. Actualizar el estado en React (lo que dispara la persistencia en localStorage vía useEffect)
+    setSession(completedSession);
+
+    // Si la nube no está configurada, finaliza en modo local seguro
+    if (!isConfigured) {
+      return;
+    }
+
+    // 3. Pasar ese mismo objeto a submitEvaluationToCloud de forma garantizada
+    isSubmittingRef.current = true;
+    try {
+      const result = await submitEvaluationToCloud(completedSession);
+      setSession(prev => ({
+        ...prev,
+        cloudSubmissionStatus: result.status,
+        cloudSubmissionTimestamp: result.serverReceivedAt || prev.cloudSubmissionTimestamp,
+        cloudSubmissionError: result.error
+      }));
+    } catch (err) {
+      setSession(prev => ({
+        ...prev,
+        cloudSubmissionStatus: 'failed',
+        cloudSubmissionError: err instanceof Error ? err.message : String(err)
+      }));
+    } finally {
+      isSubmittingRef.current = false;
+    }
+  }, [session]);
 
   const retryCloudSubmission = useCallback(async () => {
-    let targetSession: EvaluationSessionData | null = null;
-
-    setSession(prev => {
-      const updated: EvaluationSessionData = {
-        ...prev,
-        cloudSubmissionStatus: 'submitting',
-        cloudRetryCount: (prev.cloudRetryCount || 0) + 1
-      };
-      targetSession = updated;
-      return updated;
-    });
-
-    if (targetSession) {
-      try {
-        const result = await submitEvaluationToCloud(targetSession);
-        setSession(prev => ({
-          ...prev,
-          cloudSubmissionStatus: result.status,
-          cloudSubmissionTimestamp: result.serverReceivedAt || prev.cloudSubmissionTimestamp,
-          cloudSubmissionError: result.error
-        }));
-      } catch (err) {
-        setSession(prev => ({
-          ...prev,
-          cloudSubmissionStatus: 'failed',
-          cloudSubmissionError: err instanceof Error ? err.message : String(err)
-        }));
-      }
+    // Evitar reintentos concurrentes mientras ya se está transmitiendo
+    if (isSubmittingRef.current || session.cloudSubmissionStatus === 'submitting') {
+      return;
     }
-  }, []);
+
+    // Conservar clientSubmissionId existente para garantizar estricta idempotencia
+    const subId = session.clientSubmissionId && session.clientSubmissionId.trim().length >= 8
+      ? session.clientSubmissionId
+      : getOrCreateClientSubmissionId(session);
+
+    const isConfigured = isCloudConfigured();
+
+    const retryingSession: EvaluationSessionData = {
+      ...session,
+      clientSubmissionId: subId,
+      cloudSubmissionStatus: isConfigured ? 'submitting' : 'unconfigured',
+      cloudRetryCount: (session.cloudRetryCount || 0) + 1,
+      cloudSubmissionError: undefined
+    };
+
+    // 1. Actualizar estado antes de enviar
+    setSession(retryingSession);
+
+    if (!isConfigured) {
+      return;
+    }
+
+    // 2. Pasar el objeto explícito al servicio de envío
+    isSubmittingRef.current = true;
+    try {
+      const result = await submitEvaluationToCloud(retryingSession);
+      setSession(prev => ({
+        ...prev,
+        cloudSubmissionStatus: result.status,
+        cloudSubmissionTimestamp: result.serverReceivedAt || prev.cloudSubmissionTimestamp,
+        cloudSubmissionError: result.error
+      }));
+    } catch (err) {
+      setSession(prev => ({
+        ...prev,
+        cloudSubmissionStatus: 'failed',
+        cloudSubmissionError: err instanceof Error ? err.message : String(err)
+      }));
+    } finally {
+      isSubmittingRef.current = false;
+    }
+  }, [session]);
 
   const resetEvaluation = useCallback(() => {
+    isSubmittingRef.current = false;
     const fresh = createInitialSession('guiado');
     try {
       if (typeof window !== 'undefined' && window.localStorage) {

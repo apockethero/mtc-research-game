@@ -6,6 +6,7 @@ node_modules/
 # Production build artifacts
 dist/
 dist-ssr/
+release/
 *.local
 
 # Logs
@@ -46,6 +47,9 @@ scripts/check_*.mjs
 scripts/search_*.mjs
 scripts/make_backup.mjs
 
-# Public directory junction (canonical source tracked at root /card_redesign)
-public/card_redesign
+# Supabase CLI temporary files & metadata
+supabase/.temp/
+
+# Public assets synchronized for build (canonical source tracked at root /card_redesign)
+public/card_redesign/
 
