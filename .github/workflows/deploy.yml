@@ -38,13 +38,11 @@ jobs:
       - name: Install dependencies from lockfile
         run: npm ci
 
-      - name: Run automated test suite
-        run: npm test
-
       - name: Verify TypeScript types
         run: npm run typecheck
 
       # Compilación de producción con inyección de variables públicas de Supabase
+      # IMPORTANTE: Se compila antes de 'npm test' para que la prueba 66 verifique los artefactos reales de dist/
       # NOTA IMPORTANTE:
       # Configura estas variables en GitHub:
       #   Settings -> Secrets and variables -> Actions -> Variables
@@ -58,6 +56,9 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
           VITE_INGESTION_FUNCTION_URL: ${{ vars.VITE_INGESTION_FUNCTION_URL }}
         run: npm run build
+
+      - name: Run automated test suite
+        run: npm test
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v5
