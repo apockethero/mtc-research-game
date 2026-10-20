@@ -20,6 +20,7 @@ import {
 } from '../../types/evaluation';
 import { EvaluationVisualCard } from './EvaluationVisualCard';
 import { soundEngine } from '../../services/soundEngine';
+import { ResearcherAdminModal } from '../../components/admin/ResearcherAdminModal';
 
 export const EvaluationView: React.FC = () => {
   const { deck, setActiveTab } = useSession();
@@ -37,11 +38,13 @@ export const EvaluationView: React.FC = () => {
     recordHintUsed,
     setStage,
     completeEvaluation,
+    retryCloudSubmission,
     resetEvaluation
   } = useEvaluationSession();
 
   const [confirmDeleteModal, setConfirmDeleteModal] = useState<boolean>(false);
   const [validationAlert, setValidationAlert] = useState<string | null>(null);
+  const [isResearcherModalOpen, setIsResearcherModalOpen] = useState<boolean>(false);
 
   const isGuided = session.evaluationMode === 'guiado';
 
@@ -151,6 +154,14 @@ export const EvaluationView: React.FC = () => {
                   Reiniciar
                 </button>
               )}
+              <button
+                className="cyber-btn cyber-btn-outline"
+                style={{ fontSize: '11px', padding: '4px 10px' }}
+                onClick={() => setIsResearcherModalOpen(true)}
+                title="Acceso al panel administrativo y base de datos central de investigación"
+              >
+                🔒 Investigador
+              </button>
             </div>
           </div>
 
@@ -1364,9 +1375,9 @@ export const EvaluationView: React.FC = () => {
             </div>
 
             <div className="eval-alert-banner">
-              <b style={{ color: 'var(--c-copper)', fontSize: '13px' }}>⚡ Confirmación de Registro Local</b>
+              <b style={{ color: 'var(--c-copper)', fontSize: '13px' }}>⚡ Confirmación de Registro y Transmisión Central</b>
               <p>
-                Al pulsar el botón a continuación, se calcularán las puntuaciones objetivas reproducibles correspondientes a tu modalidad y se habilitarán las opciones de exportación a JSON y CSV.
+                Al pulsar el botón a continuación, se calcularán las puntuaciones objetivas reproducibles correspondientes a tu modalidad. La aplicación guardará tus respuestas de forma segura en este dispositivo e intentará transmitirlas al servidor central de investigación (si está configurado y hay conexión a internet).
               </p>
             </div>
 
@@ -1395,8 +1406,86 @@ export const EvaluationView: React.FC = () => {
             <div style={{ fontSize: '44px', marginBottom: '8px' }}>🎉</div>
             <h3 className="eval-stage-title" style={{ margin: '0 0 8px 0' }}>¡Evaluación Completada con Éxito!</h3>
             <p className="eval-stage-lead" style={{ maxWidth: '640px', margin: '0 auto 20px' }}>
-              Muchas gracias por tu tiempo y dedicación. Tus respuestas han sido procesadas localmente en <b>{isGuided ? 'Modo Guiado' : 'Modo de Investigación'}</b> con el código anónimo <b>{session.sessionId}</b>.
+              Muchas gracias por tu tiempo y dedicación. Tus respuestas han sido procesadas en <b>{isGuided ? 'Modo Guiado' : 'Modo de Investigación'}</b> con el código anónimo <b>{session.sessionId}</b>.
             </p>
+
+            {/* Estado de Sincronización en la Nube */}
+            <div style={{ maxWidth: '680px', margin: '0 auto 24px', textAlign: 'left' }}>
+              {session.cloudSubmissionStatus === 'synced' && (
+                <div className="eval-cloud-status-card synced" style={{ background: 'rgba(21, 128, 61, 0.08)', border: '1.5px solid #15803d', borderRadius: '10px', padding: '14px 18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '24px' }}>☁️✅</span>
+                    <div>
+                      <b style={{ color: '#15803d', fontSize: '13.5px', display: 'block' }}>
+                        Registrado exitosamente en la base de datos central de investigación
+                      </b>
+                      <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                        Confirmación del servidor: {session.cloudSubmissionTimestamp ? new Date(session.cloudSubmissionTimestamp).toLocaleString('es-ES') : 'Confirmado'}
+                        {session.clientSubmissionId && ` · Token: ${session.clientSubmissionId.slice(0, 24)}...`}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {session.cloudSubmissionStatus === 'submitting' && (
+                <div className="eval-cloud-status-card submitting" style={{ background: 'rgba(212, 120, 61, 0.08)', border: '1.5px solid var(--c-copper)', borderRadius: '10px', padding: '14px 18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '24px' }}>⏳</span>
+                    <div>
+                      <b style={{ color: 'var(--c-copper)', fontSize: '13.5px', display: 'block' }}>
+                        Transmitiendo evaluación a la base de datos central...
+                      </b>
+                      <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                        Validando respuestas y registrando sesión. Por favor espera unos segundos.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {session.cloudSubmissionStatus === 'failed' && (
+                <div className="eval-cloud-status-card failed" style={{ background: 'rgba(184, 44, 57, 0.08)', border: '1.5px solid var(--c-crimson)', borderRadius: '10px', padding: '14px 18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', flex: '1', minWidth: '240px' }}>
+                      <span style={{ fontSize: '24px' }}>⚠️</span>
+                      <div>
+                        <b style={{ color: 'var(--c-crimson)', fontSize: '13.5px', display: 'block' }}>
+                          Guardado en este equipo (No recibido aún por el servidor central)
+                        </b>
+                        <p style={{ margin: '3px 0 0 0', fontSize: '11.5px', color: 'var(--text-secondary)', lineHeight: 1.35 }}>
+                          {session.cloudSubmissionError || 'No se pudo conectar con el servidor central de investigación.'} Tus datos <b>NO se han perdido</b>: se encuentran seguros en la memoria de este navegador.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="cyber-btn cyber-btn-primary"
+                      style={{ fontSize: '11.5px', padding: '8px 14px', whiteSpace: 'nowrap' }}
+                      onClick={() => retryCloudSubmission()}
+                    >
+                      🔄 Reintentar Envío a la Nube
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {(!session.cloudSubmissionStatus || session.cloudSubmissionStatus === 'idle' || session.cloudSubmissionStatus === 'unconfigured' || session.cloudSubmissionStatus === 'offline_saved') && (
+                <div className="eval-cloud-status-card unconfigured" style={{ background: 'rgba(40, 20, 32, 0.4)', border: '1px solid var(--border-color)', borderRadius: '10px', padding: '12px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '22px' }}>💾</span>
+                    <div>
+                      <b style={{ color: 'var(--c-copper)', fontSize: '13px', display: 'block' }}>
+                        Almacenado localmente en este navegador
+                      </b>
+                      <span style={{ fontSize: '11.5px', color: 'var(--text-secondary)' }}>
+                        El servidor central no está configurado en este entorno de prueba o estás trabajando sin conexión. Puedes descargar tu archivo JSON o CSV para conservarlo o remitirlo al equipo de investigación.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
 
             {/* Resumen de puntuaciones objetivas */}
             {session.objectiveScores && (
@@ -1516,6 +1605,12 @@ export const EvaluationView: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Panel Administrativo del Investigador */}
+        <ResearcherAdminModal
+          isOpen={isResearcherModalOpen}
+          onClose={() => setIsResearcherModalOpen(false)}
+        />
       </div>
     </div>
   );

@@ -16,6 +16,11 @@ import {
   INSTRUMENT_VERSION,
   calculateObjectiveScores
 } from '../services/evaluationScoring';
+import {
+  submitEvaluationToCloud,
+  getOrCreateClientSubmissionId,
+  isCloudConfigured
+} from '../services/cloudSubmissionService';
 
 const EVAL_STORAGE_KEY = 'mtc_scientific_evaluation_session_v1';
 
@@ -77,7 +82,9 @@ const createInitialSession = (defaultMode: EvaluationMode = 'guiado'): Evaluatio
   hintsUsed: [],
   wasAssistedByQuestion: {},
   isComplete: false,
-  omittedOptionalFields: []
+  omittedOptionalFields: [],
+  cloudSubmissionStatus: 'idle',
+  cloudRetryCount: 0
 });
 
 export const useEvaluationSession = () => {
@@ -197,17 +204,74 @@ export const useEvaluationSession = () => {
     }));
   }, []);
 
-  const completeEvaluation = useCallback(() => {
+  const completeEvaluation = useCallback(async () => {
+    let completedSession: EvaluationSessionData | null = null;
+
     setSession(prev => {
       const scores = calculateObjectiveScores(prev.k1Responses, prev.k2Responses, prev.evaluationMode);
-      return {
+      const subId = getOrCreateClientSubmissionId(prev);
+      const updated: EvaluationSessionData = {
         ...prev,
         isComplete: true,
         completedAt: new Date().toISOString(),
         currentStage: 'stage_complete',
-        objectiveScores: scores
+        objectiveScores: scores,
+        clientSubmissionId: subId,
+        cloudSubmissionStatus: isCloudConfigured() ? 'submitting' : 'unconfigured'
       };
+      completedSession = updated;
+      return updated;
     });
+
+    if (completedSession && isCloudConfigured()) {
+      try {
+        const result = await submitEvaluationToCloud(completedSession);
+        setSession(prev => ({
+          ...prev,
+          cloudSubmissionStatus: result.status,
+          cloudSubmissionTimestamp: result.serverReceivedAt || prev.cloudSubmissionTimestamp,
+          cloudSubmissionError: result.error
+        }));
+      } catch (err) {
+        setSession(prev => ({
+          ...prev,
+          cloudSubmissionStatus: 'failed',
+          cloudSubmissionError: err instanceof Error ? err.message : String(err)
+        }));
+      }
+    }
+  }, []);
+
+  const retryCloudSubmission = useCallback(async () => {
+    let targetSession: EvaluationSessionData | null = null;
+
+    setSession(prev => {
+      const updated: EvaluationSessionData = {
+        ...prev,
+        cloudSubmissionStatus: 'submitting',
+        cloudRetryCount: (prev.cloudRetryCount || 0) + 1
+      };
+      targetSession = updated;
+      return updated;
+    });
+
+    if (targetSession) {
+      try {
+        const result = await submitEvaluationToCloud(targetSession);
+        setSession(prev => ({
+          ...prev,
+          cloudSubmissionStatus: result.status,
+          cloudSubmissionTimestamp: result.serverReceivedAt || prev.cloudSubmissionTimestamp,
+          cloudSubmissionError: result.error
+        }));
+      } catch (err) {
+        setSession(prev => ({
+          ...prev,
+          cloudSubmissionStatus: 'failed',
+          cloudSubmissionError: err instanceof Error ? err.message : String(err)
+        }));
+      }
+    }
   }, []);
 
   const resetEvaluation = useCallback(() => {
@@ -236,6 +300,7 @@ export const useEvaluationSession = () => {
     recordHintUsed,
     setStage,
     completeEvaluation,
+    retryCloudSubmission,
     resetEvaluation
   };
 };

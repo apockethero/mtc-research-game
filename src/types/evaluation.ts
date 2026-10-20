@@ -177,4 +177,9 @@ export interface EvaluationSessionData {
   wasAssistedByQuestion: Record<string, boolean>; // Traza de qué preguntas recibieron asistencia
   isComplete: boolean;
   omittedOptionalFields: string[];
+  clientSubmissionId?: string; // Token único de idempotencia para la nube
+  cloudSubmissionStatus?: 'idle' | 'submitting' | 'synced' | 'failed' | 'offline_saved' | 'unconfigured';
+  cloudSubmissionTimestamp?: string; // Marca temporal de recepción en servidor (ISO 8601)
+  cloudSubmissionError?: string;
+  cloudRetryCount?: number;
 }

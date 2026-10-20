@@ -4671,6 +4671,30 @@ body[data-theme="light"] {
   color: #2b1420;
 }
 
+[data-theme="light"] .eval-cloud-status-card.synced {
+  background: #f0fdf4;
+  border: 1.5px solid #15803d;
+  color: #14532d;
+}
+
+[data-theme="light"] .eval-cloud-status-card.submitting {
+  background: #fff7ed;
+  border: 1.5px solid var(--c-copper);
+  color: #7c2d12;
+}
+
+[data-theme="light"] .eval-cloud-status-card.failed {
+  background: #fef2f2;
+  border: 1.5px solid var(--c-crimson);
+  color: #7f1d1d;
+}
+
+[data-theme="light"] .eval-cloud-status-card.unconfigured {
+  background: #faf4ef;
+  border: 1.5px solid #dfcac0;
+  color: #2b1420;
+}
+
 [data-theme="light"] .eval-results-row-lbl {
   color: #2b1420;
 }
@@ -4929,6 +4953,35 @@ body[data-theme="light"] {
 
 .eval-results-row-lbl {
   color: #ffffff;
+}
+
+.eval-cloud-status-card {
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin: 0 auto 24px;
+  max-width: 680px;
+  text-align: left;
+  transition: all 0.25s ease;
+}
+
+.eval-cloud-status-card.synced {
+  background: rgba(21, 128, 61, 0.12);
+  border: 1.5px solid #15803d;
+}
+
+.eval-cloud-status-card.submitting {
+  background: rgba(212, 120, 61, 0.12);
+  border: 1.5px solid var(--c-copper);
+}
+
+.eval-cloud-status-card.failed {
+  background: rgba(184, 44, 57, 0.12);
+  border: 1.5px solid var(--c-crimson);
+}
+
+.eval-cloud-status-card.unconfigured {
+  background: rgba(40, 20, 32, 0.5);
+  border: 1px solid var(--border-color);
 }
 
 .eval-danger-modal {

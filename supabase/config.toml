@@ -1,0 +1,16 @@
+# Supabase configuration for MTC Research Game Centralized Collection
+project_id = "mtc-research-game"
+
+[api]
+port = 54321
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+
+[studio]
+port = 54323
+
+[functions.submit-evaluation]
+verify_jwt = false # Permite que participantes anónimos envíen evaluaciones validadas por la función

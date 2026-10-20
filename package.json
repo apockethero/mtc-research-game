@@ -8,10 +8,11 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "test": "node --test tests/verify_migration.mjs tests/behavioral_validation.test.mjs tests/button_styles.test.mjs tests/tutorials.test.mjs tests/scientific_evaluation.test.mjs tests/sequential_navigation.test.mjs tests/theme_system.test.mjs tests/combat_framing_and_contrast.test.mjs",
+    "test": "node --test tests/verify_migration.mjs tests/behavioral_validation.test.mjs tests/button_styles.test.mjs tests/tutorials.test.mjs tests/scientific_evaluation.test.mjs tests/sequential_navigation.test.mjs tests/theme_system.test.mjs tests/combat_framing_and_contrast.test.mjs tests/centralized_collection.test.mjs",
     "postinstall": "node -e \"const fs = require('fs'); if (!fs.existsSync('public/card_redesign')) { try { fs.symlinkSync('../card_redesign', 'public/card_redesign', 'junction'); } catch(e){} }\""
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.109.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
